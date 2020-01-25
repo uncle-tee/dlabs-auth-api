@@ -10,13 +10,26 @@
 This project is the authentication service of DLabs. This means that all Dlabs services will use this as
 its authentication gateway. Only one instance of this app will be provisioned across DLabs.
 
+## Dev Rules
+```bash
+Before working on a feature. Create a branch for that feature.
 
+Only merge code to the dev branch with a PR. This means never merge a code to dev alone.
+
+Make your Pull Request as small as possible.
+
+Write Test, Write Test !!! Like really write Test E2E , Unit. 
+
+But E2E makes lot of sense. Test never go wrong
+
+```
 
 ## Installation
 
 ```bash
 $ npm install
 ```
+
 
 ## Running the app
 
