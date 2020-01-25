@@ -1,0 +1,13 @@
+{
+  "type": "postgres",
+  "host": "localhost",
+  "port": "5432",
+  "database": "auth-api",
+  "username": "pgadmin",
+  "password": "pgadmin",
+  "entities": [
+    "dist/domain/entity/*.js"
+  ],
+  "synchronize": true,
+  "logging": true
+}

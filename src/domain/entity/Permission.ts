@@ -1,0 +1,11 @@
+import {Column, Entity, ObjectID, ObjectIdColumn} from 'typeorm';
+import {BaseEntity} from './BaseEntity';
+
+@Entity()
+export class Permission extends BaseEntity {
+    @Column()
+    name: string;
+    @Column()
+    code: string;
+
+}
