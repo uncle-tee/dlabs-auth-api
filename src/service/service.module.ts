@@ -2,11 +2,17 @@ import {Module} from '@nestjs/common';
 import {CoreModule} from '../core/core.module';
 import {DaoModule} from '../dao/dao.module';
 import {DtoModule} from '../dto/dto.module';
+import {AuthenticationService} from './AuthenticationService';
+import {DLabsCommonModule} from '../d-labs-common/d-labs-common.module';
 
 @Module({
     imports: [
         CoreModule,
-        DaoModule
+        DaoModule,
+        DLabsCommonModule
+    ],
+    providers: [
+        AuthenticationService
     ]
 })
 export class ServiceModule {

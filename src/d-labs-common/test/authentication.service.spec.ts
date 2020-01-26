@@ -1,5 +1,5 @@
 import {Test, TestingModule} from '@nestjs/testing';
-import {AuthenticationUtils} from './authentication-utils.service';
+import {AuthenticationUtils} from '../authentication-utils.service';
 import {WinstonModule} from 'nest-winston';
 
 describe('AuthenticationService', () => {

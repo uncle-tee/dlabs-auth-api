@@ -1,5 +1,5 @@
 import {Controller, Get} from '@nestjs/common';
-import {AuthenticationUtils} from '../../d-labs-common/authentication/authentication-utils.service';
+import {AuthenticationUtils} from '../../d-labs-common/authentication-utils.service';
 
 @Controller('auth')
 export class AuthenticationController {

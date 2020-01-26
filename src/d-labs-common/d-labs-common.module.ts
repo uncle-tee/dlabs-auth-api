@@ -1,5 +1,5 @@
 import {Module} from '@nestjs/common';
-import {AuthenticationUtils} from './authentication/authentication-utils.service';
+import {AuthenticationUtils} from './authentication-utils.service';
 import {WinstonModule} from 'nest-winston';
 import * as winston from 'winston';
 
