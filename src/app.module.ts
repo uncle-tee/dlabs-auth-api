@@ -8,14 +8,18 @@ import {DtoModule} from './dto/dto.module';
 import {ServiceModule} from './service/service.module';
 import {DLabsCommonModule} from './d-labs-common/d-labs-common.module';
 import {ConfigModule} from '@nestjs/config';
+import {WinstonModule} from 'nest-winston';
 
 @Module({
     imports: [DomainModule, CoreModule,
         DaoModule, ControllerModule,
         DtoModule, ServiceModule,
-        DLabsCommonModule, ConfigModule.forRoot({
+        DLabsCommonModule,
+        ConfigModule.forRoot({
             isGlobal: true
-        })]
+        }),
+        WinstonModule.forRoot({})
+    ]
 })
 export class AppModule {
 }
