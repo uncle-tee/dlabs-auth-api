@@ -1,4 +1,9 @@
-import { Module } from '@nestjs/common';
+import {Module} from '@nestjs/common';
+import {PortalUserRepository} from './PortalUserRepository';
 
-@Module({})
-export class DaoModule {}
+@Module({
+    providers: [PortalUserRepository],
+    exports: [PortalUserRepository]
+})
+export class DaoModule {
+}

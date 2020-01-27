@@ -4,7 +4,5 @@ import {App} from '../../domain/entity/App';
 
 export class PortalAccountDto {
     name: string;
-    app: App;
-    @Column()
     accountId: string;
 }
