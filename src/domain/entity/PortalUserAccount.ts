@@ -4,7 +4,7 @@ import {PortalAccount} from './PortalAccount';
 import {PortalUser} from './PortalUser';
 
 @Entity()
-export class PortalUserAccounts extends BaseEntity {
+export class PortalUserAccount extends BaseEntity {
 
     @ManyToOne(type => PortalAccount)
     portalAccount: PortalAccount;

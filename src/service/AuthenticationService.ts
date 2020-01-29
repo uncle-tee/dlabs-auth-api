@@ -10,7 +10,9 @@ import {PortalUserRepository} from '../dao/PortalUserRepository';
 import {LoginDto} from '../dto/auth/LoginDto';
 import {AppRepository} from '../dao/AppRepository';
 import {App} from '../domain/entity/App';
-import {PortalUserAccounts} from '../domain/entity/PortalUserAccounts';
+import {PortalUserAccount} from '../domain/entity/PortalUserAccount';
+import {PortalAccountRepository} from '../dao/PortalAccountRepository';
+import {PortalAccount} from '../domain/entity/PortalAccount';
 
 @Injectable()
 export class AuthenticationService {
@@ -21,29 +23,43 @@ export class AuthenticationService {
                 private readonly portalUserRepository: PortalUserRepository) {
     }
 
-    public verifyIncomingRequest(req: Request) {
-        return new Promise((resolve, reject) => {
-            const tokenProvided = this.verifyRequest(req, (err: VerifyErrors, decoded: object | string) => {
-                if (err) {
-                    if (err instanceof SyntaxError) {
-                        reject('Token is invalid');
-                    } else {
-                        reject(err);
-                    }
+    public verifyIncomingRequest = (req: Request) => new Promise((resolve, reject) => {
+        const tokenProvided = this.verifyRequest(req, (err: VerifyErrors, decoded: object | string) => {
+            if (err) {
+                if (err instanceof SyntaxError) {
+                    reject('Token is invalid');
+                } else {
+                    reject(err);
+                }
 
-                }
-                if (decoded) {
-                    resolve(decoded);
-                }
-            });
-            if (!tokenProvided) {
-                reject('Authorisation token is required');
+            }
+            if (decoded) {
+                resolve(decoded);
             }
         });
-    }
+        if (!tokenProvided) {
+            reject('Authorisation token is required');
+        }
+    });
 
-    public signUpUser(userDto: PortalUserDto): Promise<PortalUser> {
+    public signUpUser(userDto: PortalUserDto, re): Promise<PortalUser> {
         return this.connection.transaction((async (entityManager) => {
+            let portalAccount = null;
+
+            if (userDto.portalAccountId) {
+                portalAccount = await entityManager.getCustomRepository(PortalAccountRepository).findOneItem({
+                    accountIdSequence: userDto.portalAccountId
+                });
+            } else {
+                portalAccount = new PortalAccount();
+                portalAccount.name = `${userDto.firstName} ${userDto.lastName}`;
+                portalAccount.app = app;
+                portalAccount.status = GenericStatusConstant.ACTIVE;
+            }
+
+            if (!portalAccount) {
+                throw new NotFoundException(`Portal account with id ${userDto.portalAccountId} cannot be found`);
+            }
             const portalUser = new PortalUser();
             portalUser.firstName = userDto.firstName;
             portalUser.lastName = userDto.lastName;
@@ -51,7 +67,13 @@ export class AuthenticationService {
             portalUser.password = await this.authenticationUtils.hashPassword(userDto.password.toLowerCase());
             portalUser.gender = userDto.gender;
             portalUser.status = GenericStatusConstant.ACTIVE;
-            return entityManager.save(portalUser);
+            await entityManager.save(portalUser);
+            const portalUserAccount = new PortalUserAccount();
+            portalUserAccount.portalUser = portalUser;
+            portalUserAccount.portalAccount = portalAccount;
+            await entityManager.save(portalUserAccount);
+            return portalUser;
+
         }));
     }
 
@@ -70,8 +92,9 @@ export class AuthenticationService {
                     .select()
                     .where('portalUser.username = :username')
                     .setParameter('username', loginDto.username)
-                    .innerJoin(PortalUserAccounts, 'portalUserAccount', 'portalUserAccount.portalUser =  portalUser')
-                    .where('portalUserAccount.app = :app').setParameter('app', appValue)
+                    .innerJoin(PortalUserAccount, 'portalUserAccount', 'portalUserAccount.portalUser =  portalUser')
+                    .where('portalUserAccount.app = :app')
+                    .setParameter('app', appValue)
                     .distinct().getOne().then(async portalUserValue => {
                         if (portalUserValue) {
                             const isTrue = await this.authenticationUtils

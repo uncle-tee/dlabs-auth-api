@@ -5,10 +5,11 @@ import {GenericStatusConstant} from '../enums/GenericStatusConstant';
 
 describe('Test Portal entity', () => {
     const portalAccount = new PortalAccount();
-    portalAccount.accountId = faker.random.uuid();
+    portalAccount.accountIdSequence = faker.random.uuid();
     portalAccount.app = new App();
     portalAccount.name = faker.name.firstName();
     portalAccount.id = faker.random.number(10000);
+    portalAccount.accountId = faker.random.uuid();
     portalAccount.status = GenericStatusConstant.ACTIVE;
 
     it('test all Portal Account properties', () => {
@@ -17,5 +18,6 @@ describe('Test Portal entity', () => {
         expect(portalAccount).toHaveProperty('name');
         expect(portalAccount).toHaveProperty('id');
         expect(portalAccount).toHaveProperty('status');
+        expect(portalAccount).toHaveProperty('accountId');
     });
 });
