@@ -8,11 +8,10 @@ export class PortalAccount extends BaseEntity {
     name: string;
     @OneToOne(type => App)
     app: App;
-    @Generated('increment')
-    accountIdSequence: string;
     @Column({
+        generated: 'increment',
         nullable: true
     })
-    accountId: string;
+    accountId: number;
 
 }

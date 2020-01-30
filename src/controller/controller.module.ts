@@ -3,7 +3,7 @@ import {ServiceModule} from '../service/service.module';
 import {DaoModule} from '../dao/dao.module';
 import {CoreModule} from '../core/core.module';
 import {DLabsCommonModule} from '../d-labs-common/d-labs-common.module';
-import { AuthenticationController } from './authentication/authentication.controller';
+import { AuthenticationController } from './authentication/AuthenticationController';
 
 @Module({
     imports: [

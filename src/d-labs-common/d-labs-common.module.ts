@@ -7,11 +7,11 @@ import * as winston from 'winston';
     imports: [
         WinstonModule.forRoot({
             transports: [
-
+                new winston.transports.Console({ format: winston.format.json() })
             ]
         })
     ],
-    exports: [AuthenticationUtils],
+    exports: [AuthenticationUtils, WinstonModule],
     providers: [AuthenticationUtils]
 })
 export class DLabsCommonModule {

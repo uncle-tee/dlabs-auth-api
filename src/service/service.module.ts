@@ -11,6 +11,9 @@ import {DLabsCommonModule} from '../d-labs-common/d-labs-common.module';
         DaoModule,
         DLabsCommonModule
     ],
+    exports: [
+        AuthenticationService
+    ],
     providers: [
         AuthenticationService
     ]

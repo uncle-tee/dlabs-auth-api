@@ -1,4 +1,4 @@
-import {Injectable, NotFoundException} from '@nestjs/common';
+import {Inject, Injectable, NotFoundException, ParseUUIDPipe, UnauthorizedException} from '@nestjs/common';
 import {AuthenticationUtils} from '../d-labs-common/authentication-utils.service';
 import {verify, VerifyCallback, VerifyErrors} from 'jsonwebtoken';
 import {Request} from 'express';
@@ -13,6 +13,8 @@ import {App} from '../domain/entity/App';
 import {PortalUserAccount} from '../domain/entity/PortalUserAccount';
 import {PortalAccountRepository} from '../dao/PortalAccountRepository';
 import {PortalAccount} from '../domain/entity/PortalAccount';
+import {Logger} from 'winston';
+import {GenderConstant} from '../domain/enums/GenderConstant';
 
 @Injectable()
 export class AuthenticationService {
@@ -20,7 +22,8 @@ export class AuthenticationService {
     constructor(private readonly authenticationUtils: AuthenticationUtils,
                 private readonly connection: Connection,
                 private readonly appRepository: AppRepository,
-                private readonly portalUserRepository: PortalUserRepository) {
+                private readonly portalUserRepository: PortalUserRepository,
+                @Inject('winston') private readonly logger: Logger) {
     }
 
     public verifyIncomingRequest = (req: Request) => new Promise((resolve, reject) => {
@@ -42,19 +45,24 @@ export class AuthenticationService {
         }
     });
 
-    public signUpUser(userDto: PortalUserDto, re): Promise<PortalUser> {
+    public signUpUser(userDto: PortalUserDto, app: App): Promise<PortalUser> {
+        if (!app) {
+            throw new UnauthorizedException(app);
+        }
+
         return this.connection.transaction((async (entityManager) => {
             let portalAccount = null;
 
             if (userDto.portalAccountId) {
                 portalAccount = await entityManager.getCustomRepository(PortalAccountRepository).findOneItem({
-                    accountIdSequence: userDto.portalAccountId
+                    // accountId: userDto.portalAccountId
                 });
             } else {
                 portalAccount = new PortalAccount();
                 portalAccount.name = `${userDto.firstName} ${userDto.lastName}`;
                 portalAccount.app = app;
                 portalAccount.status = GenericStatusConstant.ACTIVE;
+                await entityManager.save(portalAccount);
             }
 
             if (!portalAccount) {
