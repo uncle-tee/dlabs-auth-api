@@ -53,10 +53,14 @@ describe('AppController', () => {
         it('Test attributes when user is created', async () => {
             const firstName = faker.name.firstName();
             const lastName = faker.name.lastName();
+            const email = faker.internet.email(firstName, lastName);
+            const phoneNumber = faker.phone.phoneNumber();
             const response = await request(app.getHttpServer()).post('/signUp').send({
                 firstName,
                 lastName,
+                email,
                 username: firstName,
+                phoneNumber,
                 gender: 'MALE',
                 password: faker.random.uuid()
             });
@@ -64,6 +68,8 @@ describe('AppController', () => {
             expect(response.body.lastName).toBe(lastName);
             expect(response.body.password).toBeNull();
             expect(response.body.gender).toBe('MALE');
+            expect(response.body.email).toBe(email);
+            expect(response.body.phoneNumber).toBe(phoneNumber);
             expect(response.body.firstName).toBe(firstName);
         });
 
@@ -71,6 +77,7 @@ describe('AppController', () => {
 
     afterAll(async () => {
         await app.close();
+        await connection.close();
 
     });
 });
