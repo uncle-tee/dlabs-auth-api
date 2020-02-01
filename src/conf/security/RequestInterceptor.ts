@@ -3,7 +3,6 @@ import {Observable} from 'rxjs';
 import {AuthenticationService} from '../../service/AuthenticationService';
 import {Reflector} from '@nestjs/core';
 import {Logger} from 'winston';
-import {map, tap} from 'rxjs/operators';
 import {App} from '../../domain/entity/App';
 import {AccessType} from './accessTypes/AccessType';
 
@@ -16,13 +15,10 @@ export class RequestInterceptor implements NestInterceptor {
     }
 
     intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-        // tslint:disable-next-line:no-console
-        console.log('Starting up interceptor');
 
         const publicAccesstyps = this.reflector.getAll(AccessType.PUBLIC, [
             context.getHandler(), context.getClass()
         ]);
-
 
         if (publicAccesstyps.includes(AccessType.PUBLIC)) {
             return next.handle();
@@ -30,25 +26,9 @@ export class RequestInterceptor implements NestInterceptor {
         const request = context.switchToHttp().getRequest().body;
         const app = new App();
         app.token = '12345';
+        app.name = 'Test App Name';
         request.app = app;
-        return  next.handle();
-
-       /* return next.handle().pipe(
-            tap(() => {
-                // tslint:disable-next-line:no-console
-                console.log('context', context.switchToHttp().getRequest());
-            }),
-            map((data) => {
-                const request = context.switchToHttp().getRequest().body;
-                // tslint:disable-next-line:no-console
-                console.log('request log', request);
-
-                const app = new App();
-                app.token = '12345';
-                request.app = app;
-                return data;
-            })
-        );*/
+        return next.handle();
     }
 
 }

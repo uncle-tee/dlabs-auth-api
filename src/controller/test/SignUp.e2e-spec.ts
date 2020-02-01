@@ -8,6 +8,8 @@ import * as request from 'supertest';
 import {getConnection} from 'typeorm';
 import {Connection} from 'typeorm/connection/Connection';
 import * as faker from 'faker';
+import {App} from '../../domain/entity/App';
+import {AppRepository} from '../../dao/AppRepository';
 
 describe('AppController', () => {
     let app: INestApplication;
@@ -22,6 +24,10 @@ describe('AppController', () => {
         app = moduleRef.createNestApplication();
         await app.init();
         connection = getConnection();
+        const application = new App();
+        application.name = 'TEST APP';
+        application.token = '1234564';
+        connection.getCustomRepository(AppRepository).save(application);
 
     });
 
@@ -33,7 +39,9 @@ describe('AppController', () => {
                     lastName: 'Adenekan',
                     username: 'tadenekan',
                     gender: 'MALE',
-                    password: 'school'
+                    password: 'school',
+                    phoneNumber: faker.phone.phoneNumber(),
+                    email: faker.internet.email()
 
                 }
             ).expect(201);
@@ -45,9 +53,10 @@ describe('AppController', () => {
                 lastName: 'Adenekan',
                 username: 'tadenekan',
                 gender: 'MALE',
-                password: 'school'
-
-            }).expect(201);
+                password: 'school',
+                phoneNumber: faker.phone.phoneNumber(),
+                email: faker.internet.email()
+            }).expect(409);
         });
 
         it('Test attributes when user is created', async () => {

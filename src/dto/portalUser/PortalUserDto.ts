@@ -12,5 +12,7 @@ export class PortalUserDto {
     gender: GenderConstant;
     password: string;
     confirmPassword: string;
-    portalAccountId: string; // When Account Id is Null create a new account ID
+    email: string;
+    phoneNumber: string;
+    portalAccountName: string; // When Account Id is Null create a new account ID
 }

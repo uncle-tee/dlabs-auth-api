@@ -23,4 +23,8 @@ export class PortalUser extends BaseEntity {
         nullable: true
     })
     address: Address;
+    @Column()
+    email: string;
+    @Column()
+    phoneNumber: string;
 }

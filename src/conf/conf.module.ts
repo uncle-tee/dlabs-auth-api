@@ -6,6 +6,7 @@ import {APP_GUARD, APP_INTERCEPTOR} from '@nestjs/core';
 import {RequestInterceptor} from './security/RequestInterceptor';
 import * as winston from 'winston';
 import {LoggerInterceptor} from './security/LoggerInterceptor';
+import {PortalAccountSequenceGenerator} from '../core/sequenceGenerators/PortalAccountSequenceGenerator';
 
 @Module({
     imports: [CoreModule,
@@ -14,6 +15,8 @@ import {LoggerInterceptor} from './security/LoggerInterceptor';
                 new winston.transports.Console({format: winston.format.json()})
             ]
         })],
+    exports: [
+    ],
     providers: [{
         provide: APP_INTERCEPTOR,
         useClass: LoggerInterceptor

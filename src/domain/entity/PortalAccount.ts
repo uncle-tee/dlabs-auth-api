@@ -4,14 +4,15 @@ import {App} from './App';
 
 @Entity()
 export class PortalAccount extends BaseEntity {
-    @Column()
+    @Column({
+        unique: true
+    })
     name: string;
-    @OneToOne(type => App)
+    @Column(type => App)
     app: App;
     @Column({
-        generated: 'increment',
-        nullable: true
+        unique: true
     })
-    accountId: number;
+    accountId: string;
 
 }

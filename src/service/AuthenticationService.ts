@@ -1,4 +1,4 @@
-import {Inject, Injectable, NotFoundException, ParseUUIDPipe, UnauthorizedException} from '@nestjs/common';
+import {ConflictException, Inject, Injectable, NotFoundException, UnauthorizedException} from '@nestjs/common';
 import {AuthenticationUtils} from '../d-labs-common/authentication-utils.service';
 import {verify, VerifyCallback, VerifyErrors} from 'jsonwebtoken';
 import {Request} from 'express';
@@ -14,7 +14,7 @@ import {PortalUserAccount} from '../domain/entity/PortalUserAccount';
 import {PortalAccountRepository} from '../dao/PortalAccountRepository';
 import {PortalAccount} from '../domain/entity/PortalAccount';
 import {Logger} from 'winston';
-import {GenderConstant} from '../domain/enums/GenderConstant';
+import {PortalAccountSequenceGenerator} from '../core/sequenceGenerators/PortalAccountSequenceGenerator';
 
 @Injectable()
 export class AuthenticationService {
@@ -23,6 +23,7 @@ export class AuthenticationService {
                 private readonly connection: Connection,
                 private readonly appRepository: AppRepository,
                 private readonly portalUserRepository: PortalUserRepository,
+                private readonly portalAccountSequenceGenerator: PortalAccountSequenceGenerator,
                 @Inject('winston') private readonly logger: Logger) {
     }
 
@@ -50,23 +51,50 @@ export class AuthenticationService {
             throw new UnauthorizedException(app);
         }
 
-        return this.connection.transaction((async (entityManager) => {
+        return this.connection.transaction(async (entityManager) => {
+
             let portalAccount = null;
 
-            if (userDto.portalAccountId) {
+            if (userDto.portalAccountName) {
                 portalAccount = await entityManager.getCustomRepository(PortalAccountRepository).findOneItem({
-                    // accountId: userDto.portalAccountId
+                    name: userDto.username
                 });
+                if (portalAccount) {
+                    throw new NotFoundException(`Portal account with name cannot be found ${userDto.portalAccountName}`);
+                }
             } else {
+                const existingPortalAccount = await entityManager.getCustomRepository(PortalAccountRepository).findOneItem({
+                    name: userDto.username,
+                    app
+                });
+                if (existingPortalAccount) {
+                    throw new ConflictException(`username ${userDto.username} already exist`);
+                }
                 portalAccount = new PortalAccount();
-                portalAccount.name = `${userDto.firstName} ${userDto.lastName}`;
+                portalAccount.name = userDto.username;
                 portalAccount.app = app;
+                portalAccount.accountId = await this.portalAccountSequenceGenerator.next(entityManager);
                 portalAccount.status = GenericStatusConstant.ACTIVE;
                 await entityManager.save(portalAccount);
             }
 
+            const portalUserWithUsername: number = await entityManager
+                .getCustomRepository(PortalUserRepository)
+                .countPortalUserUserNameByApp(userDto.username, portalAccount, portalAccount);
+
+            if (portalUserWithUsername) {
+                throw new ConflictException('User name already Exist');
+            }
+            const portalUserWithEmail: number = await entityManager
+                .getCustomRepository(PortalUserRepository)
+                .countEmailByApp(userDto.email, app, portalAccount);
+
+            if (portalUserWithEmail) {
+                throw new ConflictException(('Email already Exist'));
+            }
+
             if (!portalAccount) {
-                throw new NotFoundException(`Portal account with id ${userDto.portalAccountId} cannot be found`);
+                throw new NotFoundException(`Portal account with id ${userDto.portalAccountName} cannot be found`);
             }
             const portalUser = new PortalUser();
             portalUser.firstName = userDto.firstName;
@@ -74,6 +102,8 @@ export class AuthenticationService {
             portalUser.username = userDto.username.toLowerCase();
             portalUser.password = await this.authenticationUtils.hashPassword(userDto.password.toLowerCase());
             portalUser.gender = userDto.gender;
+            portalUser.email = userDto.email;
+            portalUser.phoneNumber = userDto.phoneNumber;
             portalUser.status = GenericStatusConstant.ACTIVE;
             await entityManager.save(portalUser);
             const portalUserAccount = new PortalUserAccount();
@@ -82,7 +112,7 @@ export class AuthenticationService {
             await entityManager.save(portalUserAccount);
             return portalUser;
 
-        }));
+        });
     }
 
     public loginUser(loginDto: LoginDto, request: Request): Promise<PortalUser> {
@@ -101,7 +131,7 @@ export class AuthenticationService {
                     .where('portalUser.username = :username')
                     .setParameter('username', loginDto.username)
                     .innerJoin(PortalUserAccount, 'portalUserAccount', 'portalUserAccount.portalUser =  portalUser')
-                    .where('portalUserAccount.app = :app')
+                    .where('portalUserAccount.app = :app') // thgis is wrong
                     .setParameter('app', appValue)
                     .distinct().getOne().then(async portalUserValue => {
                         if (portalUserValue) {
