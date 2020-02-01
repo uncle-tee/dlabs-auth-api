@@ -14,8 +14,7 @@ export class PortalUser extends BaseEntity {
     })
     username: string;
     @Column({
-        type: 'enum',
-        enum: GenderConstant
+        type: 'text'
     })
     gender: GenderConstant;
     @Column()
@@ -24,4 +23,8 @@ export class PortalUser extends BaseEntity {
         nullable: true
     })
     address: Address;
+    @Column()
+    email: string;
+    @Column()
+    phoneNumber: string;
 }
