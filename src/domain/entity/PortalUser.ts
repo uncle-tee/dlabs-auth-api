@@ -1,4 +1,4 @@
-import {Column, Entity, ObjectID, ObjectIdColumn, OneToOne, PrimaryGeneratedColumn} from 'typeorm';
+import {Column, Entity, JoinColumn, ObjectID, ObjectIdColumn, OneToOne, PrimaryGeneratedColumn} from 'typeorm';
 import {GenderConstant} from '../enums/GenderConstant';
 import {BaseEntity} from './BaseEntity';
 import {Address} from './Address';
@@ -22,6 +22,7 @@ export class PortalUser extends BaseEntity {
     @OneToOne(type => Address, {
         nullable: true
     })
+    @JoinColumn()
     address: Address;
     @Column()
     email: string;

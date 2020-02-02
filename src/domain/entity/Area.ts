@@ -1,4 +1,4 @@
-import {Column, Entity, ObjectID, ObjectIdColumn, OneToOne} from 'typeorm';
+import {Column, Entity, ManyToOne, ObjectID, ObjectIdColumn, OneToOne} from 'typeorm';
 import {Lga} from './Lga';
 import {BaseEntity} from './BaseEntity';
 
@@ -8,6 +8,6 @@ export class Area extends BaseEntity {
     name: string;
     @Column()
     code: string;
-    @OneToOne(type => Lga)
+    @ManyToOne(type => Lga)
     lga: Lga;
 }

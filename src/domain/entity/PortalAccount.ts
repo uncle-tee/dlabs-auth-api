@@ -1,4 +1,4 @@
-import {Column, Entity, Generated, ObjectID, ObjectIdColumn, OneToOne, PrimaryGeneratedColumn} from 'typeorm';
+import {Column, Entity, Generated, JoinColumn, ManyToOne, ObjectID, ObjectIdColumn, OneToOne, PrimaryGeneratedColumn} from 'typeorm';
 import {BaseEntity} from './BaseEntity';
 import {App} from './App';
 
@@ -8,7 +8,7 @@ export class PortalAccount extends BaseEntity {
         unique: true
     })
     name: string;
-    @Column(type => App)
+    @ManyToOne(type => App)
     app: App;
     @Column({
         unique: true

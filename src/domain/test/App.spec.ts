@@ -13,5 +13,6 @@ describe('App Entity', () => {
         expect(app).toHaveProperty('name');
         expect(app).toHaveProperty('status');
         expect(app).toHaveProperty('id');
+        expect(app).toHaveProperty('appId');
     });
 });

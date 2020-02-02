@@ -1,4 +1,4 @@
-import {Column, Entity, ObjectID, ObjectIdColumn, OneToOne} from 'typeorm';
+import {Column, Entity, ManyToOne, ObjectID, ObjectIdColumn, OneToOne} from 'typeorm';
 import {State} from './State';
 import {BaseEntity} from './BaseEntity';
 
@@ -8,6 +8,6 @@ export class Lga extends BaseEntity {
     name: string;
     @Column()
     code: string;
-    @OneToOne(type => State)
+    @ManyToOne(type => State)
     state: State;
 }

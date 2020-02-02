@@ -11,8 +11,8 @@ import {ConfigModule} from '@nestjs/config';
 import {WinstonModule} from 'nest-winston';
 import {ConfModule} from './conf/conf.module';
 import {APP_GUARD, APP_INTERCEPTOR} from '@nestjs/core';
-import {RequestInterceptor} from './conf/security/RequestInterceptor';
-import {LoggerInterceptor} from './conf/security/LoggerInterceptor';
+import {AppInterceptor} from './conf/security/interceptors/AppInterceptor';
+import {LoggerInterceptor} from './conf/security/interceptors/LoggerInterceptor';
 
 @Module({
     imports: [DomainModule, CoreModule,
