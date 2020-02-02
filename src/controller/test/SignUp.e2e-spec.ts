@@ -10,10 +10,13 @@ import {Connection} from 'typeorm/connection/Connection';
 import * as faker from 'faker';
 import {App} from '../../domain/entity/App';
 import {AppRepository} from '../../dao/AppRepository';
+import {TestUtils} from './utils/TestUtils';
 
 describe('AppController', () => {
-    let app: INestApplication;
+    let applicationContext: INestApplication;
     let connection: Connection;
+    let testUtils: TestUtils;
+    let appHeader: App;
 
     beforeAll(async () => {
         const moduleRef: TestingModule = await Test.createTestingModule({
@@ -21,20 +24,46 @@ describe('AppController', () => {
             providers: [AppService],
         }).compile();
 
-        app = moduleRef.createNestApplication();
-        await app.init();
+        applicationContext = moduleRef.createNestApplication();
+        await applicationContext.init();
         connection = getConnection();
-        const application = new App();
-        application.name = 'TEST APP';
-        application.token = '1234564';
-        connection.getCustomRepository(AppRepository).save(application);
+        testUtils = new TestUtils(connection);
+        appHeader = await testUtils.getAuthorisedApp();
 
     });
 
     describe('/signUp', () => {
         it('Test sign up route can sign up a user', () => {
-            return request(app.getHttpServer()).post('/signUp').send(
-                {
+            return request(applicationContext.getHttpServer())
+                .post('/signUp')
+                .set({
+                    'X-APP-CODE': appHeader.code,
+                    'X-APP-TOKEN': appHeader.token,
+                    'Authorisation': appHeader.token
+                })
+                .send(
+                    {
+                        firstName: 'Olueatobi',
+                        lastName: 'Adenekan',
+                        username: 'tadenekan',
+                        gender: 'MALE',
+                        password: 'school',
+                        phoneNumber: faker.phone.phoneNumber(),
+                        email: faker.internet.email()
+
+                    }
+                ).expect(201);
+        });
+
+        it('Test if same user with same user name can exit', () => {
+            return request(applicationContext.getHttpServer())
+                .post('/signUp')
+                .set({
+                    'X-APP-CODE': appHeader.code,
+                    'X-APP-TOKEN': appHeader.token,
+                    'Authorisation': appHeader.token
+                })
+                .send({
                     firstName: 'Olueatobi',
                     lastName: 'Adenekan',
                     username: 'tadenekan',
@@ -42,21 +71,7 @@ describe('AppController', () => {
                     password: 'school',
                     phoneNumber: faker.phone.phoneNumber(),
                     email: faker.internet.email()
-
-                }
-            ).expect(201);
-        });
-
-        it('Test if same user with same user name can exit', () => {
-            return request(app.getHttpServer()).post('/signUp').send({
-                firstName: 'Olueatobi',
-                lastName: 'Adenekan',
-                username: 'tadenekan',
-                gender: 'MALE',
-                password: 'school',
-                phoneNumber: faker.phone.phoneNumber(),
-                email: faker.internet.email()
-            }).expect(409);
+                }).expect(409);
         });
 
         it('Test attributes when user is created', async () => {
@@ -64,15 +79,21 @@ describe('AppController', () => {
             const lastName = faker.name.lastName();
             const email = faker.internet.email(firstName, lastName);
             const phoneNumber = faker.phone.phoneNumber();
-            const response = await request(app.getHttpServer()).post('/signUp').send({
-                firstName,
-                lastName,
-                email,
-                username: firstName,
-                phoneNumber,
-                gender: 'MALE',
-                password: faker.random.uuid()
-            });
+            const response = await request(applicationContext.getHttpServer())
+                .post('/signUp')
+                .set({
+                    'X-APP-CODE': appHeader.code,
+                    'X-APP-TOKEN': appHeader.token,
+                    'Authorisation': appHeader.token
+                }).send({
+                    firstName,
+                    lastName,
+                    email,
+                    username: firstName,
+                    phoneNumber,
+                    gender: 'MALE',
+                    password: faker.random.uuid()
+                });
             expect(response.body.username).toBe(firstName.toLowerCase());
             expect(response.body.lastName).toBe(lastName);
             expect(response.body.password).toBeNull();
@@ -85,7 +106,7 @@ describe('AppController', () => {
     });
 
     afterAll(async () => {
-        await app.close();
+        await applicationContext.close();
         await connection.close();
 
     });

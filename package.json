@@ -17,7 +17,7 @@
     "test:watch": "jest --watch",
     "test:cov": "cross-env jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": " cross-env TYPEORM_USERNAME=test TYPEORM_PASSWORD=test TYPEORM_DATABASE=test TYPEORM_DROP_SCHEMA=true  TYPEORM_LOGGING=false jest --config ./src/controller/test/jest-e2e.json"
+    "test:e2e": " cross-env TYPEORM_USERNAME=test TYPEORM_PASSWORD=test TYPEORM_DATABASE=test TYPEORM_DROP_SCHEMA=true  TYPEORM_LOGGING=true jest --config ./src/controller/test/jest-e2e.json"
   },
   "dependencies": {
     "@nestjs/common": "^6.7.2",
@@ -36,7 +36,7 @@
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.0",
     "rxjs": "^6.5.3",
-    "typeorm": "^0.2.22",
+    "typeorm": "^0.2.21",
     "winston": "^3.2.1"
   },
   "devDependencies": {

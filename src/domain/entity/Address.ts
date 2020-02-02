@@ -1,4 +1,4 @@
-import {Column, Entity, ObjectID, ObjectIdColumn, OneToOne} from 'typeorm';
+import {Column, Entity, ManyToOne, ObjectID, ObjectIdColumn, OneToOne} from 'typeorm';
 import {BaseEntity} from './BaseEntity';
 import {Area} from './Area';
 
@@ -10,6 +10,6 @@ export class Address extends BaseEntity {
     longitude: string;
     @Column()
     latitude: string;
-    @OneToOne(type => Area)
+    @ManyToOne(type => Area)
     area: Area;
 }

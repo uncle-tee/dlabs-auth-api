@@ -51,6 +51,8 @@ export class AuthenticationService {
             throw new UnauthorizedException(app);
         }
 
+        // tslint:disable-next-line:no-console
+        console.log(app);
         return this.connection.transaction(async (entityManager) => {
 
             let portalAccount = null;
@@ -67,6 +69,8 @@ export class AuthenticationService {
                     name: userDto.username,
                     app
                 });
+                // tslint:disable-next-line:no-console
+                console.log(existingPortalAccount);
                 if (existingPortalAccount) {
                     throw new ConflictException(`username ${userDto.username} already exist`);
                 }

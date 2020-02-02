@@ -1,4 +1,4 @@
-import {Column, Entity, ObjectID, ObjectIdColumn, OneToOne} from 'typeorm';
+import {Column, Entity, ManyToOne, ObjectID, ObjectIdColumn, OneToOne} from 'typeorm';
 import {Country} from './Country';
 import {BaseEntity} from './BaseEntity';
 
@@ -8,7 +8,7 @@ export class State extends BaseEntity {
     name: string;
     @Column()
     code: string;
-    @OneToOne(type => Country)
+    @ManyToOne(type => Country)
     country: Country;
 
 }

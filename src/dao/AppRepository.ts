@@ -4,5 +4,5 @@ import {BaseRepository} from '../d-labs-common/dao/BaseRepository';
 
 @EntityRepository(App)
 export class AppRepository extends BaseRepository<App> {
-
+    
 }

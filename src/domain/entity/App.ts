@@ -5,7 +5,13 @@ import {BaseEntity} from './BaseEntity';
 export class App extends BaseEntity {
     @Column()
     name: string;
-    @Column()
+    @Column({
+        unique: true
+    })
     token: string;
+    @Column({
+        unique: true
+    })
+    code: string;
 
 }

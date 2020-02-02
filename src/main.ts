@@ -1,7 +1,7 @@
 import {NestFactory} from '@nestjs/core';
 import {AppModule} from './app.module';
 import {WinstonModule} from 'nest-winston';
-import {RequestInterceptor} from './conf/security/RequestInterceptor';
+import {AppInterceptor} from './conf/security/interceptors/AppInterceptor';
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule, {});

@@ -15,6 +15,7 @@ export class AuthenticationController {
     }
 
     @Post('/signUp')
+    @Public()
     public async signUpUser(@Body() portalUser: PortalUserDto, @Application() app: App) {
         const portalUser1 = await this.authenticationService.signUpUser(portalUser, app);
         portalUser1.password = null;
