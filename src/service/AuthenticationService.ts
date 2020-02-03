@@ -1,4 +1,4 @@
-import {ConflictException, Inject, Injectable, NotFoundException, UnauthorizedException} from '@nestjs/common';
+import {ConflictException, Inject, Injectable, NotFoundException, Scope, UnauthorizedException} from '@nestjs/common';
 import {AuthenticationUtils} from '../d-labs-common/authentication-utils.service';
 import {verify, VerifyCallback, VerifyErrors} from 'jsonwebtoken';
 import {Request} from 'express';
@@ -8,7 +8,6 @@ import {PortalUser} from '../domain/entity/PortalUser';
 import {GenericStatusConstant} from '../domain/enums/GenericStatusConstant';
 import {PortalUserRepository} from '../dao/PortalUserRepository';
 import {LoginDto} from '../dto/auth/LoginDto';
-import {AppRepository} from '../dao/AppRepository';
 import {App} from '../domain/entity/App';
 import {PortalUserAccount} from '../domain/entity/PortalUserAccount';
 import {PortalAccountRepository} from '../dao/PortalAccountRepository';
@@ -16,13 +15,10 @@ import {PortalAccount} from '../domain/entity/PortalAccount';
 import {Logger} from 'winston';
 import {PortalAccountSequenceGenerator} from '../core/sequenceGenerators/PortalAccountSequenceGenerator';
 
-@Injectable()
 export class AuthenticationService {
 
     constructor(private readonly authenticationUtils: AuthenticationUtils,
                 private readonly connection: Connection,
-                private readonly appRepository: AppRepository,
-                private readonly portalUserRepository: PortalUserRepository,
                 private readonly portalAccountSequenceGenerator: PortalAccountSequenceGenerator,
                 @Inject('winston') private readonly logger: Logger) {
     }
@@ -50,7 +46,6 @@ export class AuthenticationService {
         if (!app) {
             throw new UnauthorizedException(app);
         }
-
 
         return this.connection.transaction(async (entityManager) => {
 
@@ -117,39 +112,30 @@ export class AuthenticationService {
         });
     }
 
-    public loginUser(loginDto: LoginDto, request: Request): Promise<PortalUser> {
-        const appId = request.header('X-APP-ID');
-        const app: Promise<App> = this.appRepository.findOneItem({token: appId}).then(value => {
-            if (!value) {
-                throw new NotFoundException(`App with token ${appId} cannot be found`);
-            }
-            return Promise.resolve(value);
-        });
+    public loginUser(loginDto: LoginDto, app: App): Promise<string> {
 
-        return app.then(appValue => {
-            if (appValue) {
-                return this.portalUserRepository.createQueryBuilder('portalUser')
-                    .select()
-                    .where('portalUser.username = :username')
-                    .setParameter('username', loginDto.username)
-                    .innerJoin(PortalUserAccount, 'portalUserAccount', 'portalUserAccount.portalUser =  portalUser')
-                    .where('portalUserAccount.app = :app') // thgis is wrong
-                    .setParameter('app', appValue)
-                    .distinct().getOne().then(async portalUserValue => {
-                        if (portalUserValue) {
-                            const isTrue = await this.authenticationUtils
-                                .comparePassword(loginDto.password, portalUserValue.password);
-                            if (isTrue) {
-                                return Promise.resolve(portalUserValue);
-                            }
-                        } else {
-                            return Promise.reject('User name or password does is incorrect');
-                        }
-                    });
-            } else {
-                return Promise.reject('App does not exist');
-            }
-        });
+        return this.connection.getCustomRepository(PortalUserRepository).createQueryBuilder('portalUser')
+            .select()
+            .where('portalUser.username = :username')
+            .setParameter('username', loginDto.username.toLowerCase())
+            .innerJoin(PortalUserAccount, 'portalUserAccount', 'portalUserAccount.portalUser =  portalUser.id')
+            .innerJoin(PortalAccount, 'portalAccount', 'portalUserAccount.portalAccount = portalAccount.id')
+            .where('portalAccount.app = :app')
+            .setParameter('app', app.id)
+            .distinct().getOne()
+            .then(async portalUserValue => {
+                if (portalUserValue) {
+                    const isTrue = await this.authenticationUtils
+                        .comparePassword(loginDto.password, portalUserValue.password);
+                    if (isTrue) {
+                        const token = await this.authenticationUtils.generateToken(portalUserValue.id);
+                        return Promise.resolve(token);
+                    }
+                    throw new UnauthorizedException('Username or password is incorrect');
+                } else {
+                    throw new UnauthorizedException('Username or password is incorrect');
+                }
+            });
 
     }
 
