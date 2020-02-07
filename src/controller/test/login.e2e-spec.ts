@@ -37,7 +37,7 @@ describe('AppController', () => {
     });
 
     describe('/login', () => {
-        it('login', () => {
+        it('Test that user can login with right details', () => {
             return request(applicationContext.getHttpServer())
                 .post('/login')
                 .set({
@@ -54,11 +54,28 @@ describe('AppController', () => {
                 ).expect(201);
         });
 
+        it('Test that Authorised user cannot log in', () => {
+            return request(applicationContext.getHttpServer())
+                .post('/login')
+                .set({
+                    'X-APP-CODE': appHeader.code,
+                    'X-APP-TOKEN': appHeader.token,
+                    'Authorisation': appHeader.token
+                })
+                .send(
+                    {
+                        username: faker.name.firstName(),
+                        password: faker.random.uuid(),
+
+                    }
+                ).expect(401);
+        });
+
     });
 
     afterAll(async () => {
         await applicationContext.close();
-       // await connection.close();
+        // await connection.close();
 
     });
 });

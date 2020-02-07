@@ -13,14 +13,14 @@ export abstract class SequenceGeneratorImpl implements SequenceGenerator, OnAppl
     }
 
     // @ts-ignore
-    async nextLong(entityManager: EntityManager): number {
-        const promise = entityManager.query(`select nextval ('${this.sequenceTableName}')`);
+    async nextLong(): number {
+        const promise = this.entityManager.query(`select nextval ('${this.sequenceTableName}')`);
         const result = await promise;
         return Number(result[0].nextval);
 
     }
 
-    async next(entityManager: EntityManager): Promise<string> {
+    async next(): Promise<string> {
         return Promise.resolve('');
     }
 

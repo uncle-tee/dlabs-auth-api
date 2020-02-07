@@ -70,7 +70,7 @@ export class AuthenticationService {
                 portalAccount = new PortalAccount();
                 portalAccount.name = userDto.username;
                 portalAccount.app = app;
-                portalAccount.accountId = await this.portalAccountSequenceGenerator.next(entityManager);
+                portalAccount.accountId = await this.portalAccountSequenceGenerator.next();
                 portalAccount.status = GenericStatusConstant.ACTIVE;
                 await entityManager.save(portalAccount);
             }

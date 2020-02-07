@@ -3,12 +3,8 @@ import {Observable} from 'rxjs';
 import {AuthenticationService} from '../../../service/AuthenticationService';
 import {Reflector} from '@nestjs/core';
 import {Logger} from 'winston';
-import {App} from '../../../domain/entity/App';
-import {AccessType} from '../accessTypes/AccessType';
-import {ExceptionsHandler} from '@nestjs/core/exceptions/exceptions-handler';
 import {AppRepository} from '../../../dao/AppRepository';
 import {Connection} from 'typeorm';
-import {Request} from 'express';
 
 @Injectable()
 export class AppInterceptor implements NestInterceptor {
