@@ -10,8 +10,8 @@ export class AppIdSequenceGenerator extends SequenceGeneratorImpl {
         super('app_id', connection.createEntityManager());
     }
 
-    async next(entityManager: EntityManager): Promise<string> {
-        const long = await this.nextLong(entityManager);
-        return `APP${zeroFills(long, 6)}`;
+    async next(): Promise<string> {
+        const nextLong = this.nextLong();
+        return `APP${zeroFills(nextLong, 6)}`;
     }
 }

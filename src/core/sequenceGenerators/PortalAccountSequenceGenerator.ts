@@ -9,8 +9,8 @@ export class PortalAccountSequenceGenerator extends SequenceGeneratorImpl {
         super('portal_account_id', connection.createEntityManager());
     }
 
-    async next(entityManager: EntityManager): Promise<string> {
-        const long = await this.nextLong(entityManager);
+    async next(): Promise<string> {
+        const long = await this.nextLong();
         // tslint:disable-next-line:no-console
         return `ACT${zeroFills(long, 10)}`;
     }

@@ -1,15 +1,23 @@
 import {CallHandler, ExecutionContext, Injectable, NestInterceptor, UnauthorizedException} from '@nestjs/common';
 import {Observable} from 'rxjs';
 import {AccessType} from '../accessTypes/AccessType';
-import {AppRepository} from '../../../dao/AppRepository';
 import {Reflector} from '@nestjs/core';
+import {Connection} from 'typeorm';
+import {AuthenticationService} from '../../../service/AuthenticationService';
+import {PortalUserRepository} from '../../../dao/PortalUserRepository';
+import {PortalUser} from '../../../domain/entity/PortalUser';
+import {Principal} from '../requestPrincipal/Principal';
+import {TokenExpiredError} from 'jsonwebtoken';
 
 @Injectable()
 export class AuthenticationInterceptor implements NestInterceptor {
-    constructor(private readonly reflector: Reflector) {
+    constructor(private readonly reflector: Reflector,
+                private readonly authenticationService: AuthenticationService,
+                private readonly  connection: Connection) {
     }
 
-    intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    // @ts-ignore
+    async intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
 
         const publicAccesstypes = this.reflector.getAll(AccessType.PUBLIC, [
             context.getHandler(), context.getClass()
@@ -19,10 +27,31 @@ export class AuthenticationInterceptor implements NestInterceptor {
             return next.handle();
         }
 
-        throw new UnauthorizedException('Client is not authorised to access this route');
-        // const header = context.switchToHttp().getRequest().body;
-        //
-        // return next.handle();
+        const request = context.switchToHttp().getRequest();
+        const ip = request.headers['x-forwarded-for'] || request.connection.remoteAddress;
+        await this.authenticationService
+            .verifyIncomingRequest(request).then((decoded: { sub: string }) => {
+                return this.connection.getCustomRepository(PortalUserRepository).findOneItem({
+                    id: Number(decoded.sub)
+                });
+            }).then((portalUser: PortalUser) => {
+                delete portalUser.password;
+                request.requestPrincipal = new Principal(portalUser, ip);
+            }).catch((error) => {
+                if (error instanceof TokenExpiredError) {
+                    const tokenError = error as TokenExpiredError;
+                    throw new UnauthorizedException(tokenError.message);
+                }
+                if (error instanceof UnauthorizedException) {
+                    throw new UnauthorizedException('Client is not authorised to login');
+                }
+
+                throw  error;
+                // throw new UnauthorizedException('Client is not authorised to log in');
+
+            });
+
+        return next.handle();
     }
 
 }

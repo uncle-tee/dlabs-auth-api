@@ -1,4 +1,4 @@
-import {Body, Controller, Post} from '@nestjs/common';
+import {Body, Controller, Get, Post} from '@nestjs/common';
 import {AuthenticationUtils} from '../../d-labs-common/authentication-utils.service';
 import {AuthenticationService} from '../../service/AuthenticationService';
 import {PortalUserDto} from '../../dto/portalUser/PortalUserDto';
@@ -8,6 +8,8 @@ import {App as Application} from '../decorators/App';
 import {Request} from 'express';
 import {LoginDto} from '../../dto/auth/LoginDto';
 import {LoginResponse} from '../../dto/auth/LoginResponse';
+import {Principal} from '../../conf/security/requestPrincipal/Principal';
+import {RequestPrincipal} from '../../conf/security/requestPrincipal/RequestPrincipal';
 
 @Controller()
 export class AuthenticationController {
@@ -32,5 +34,10 @@ export class AuthenticationController {
         response.token = token;
         return response;
 
+    }
+
+    @Get('/me')
+    public async getPrincipal(@RequestPrincipal() requestPrincipal: Principal) {
+        return requestPrincipal;
     }
 }

@@ -8,13 +8,14 @@ import * as winston from 'winston';
 import {LoggerInterceptor} from './security/interceptors/LoggerInterceptor';
 import {DaoModule} from '../dao/dao.module';
 import {AuthenticationInterceptor} from './security/interceptors/AuthenticationInterceptor.service';
-
+import {DLabsCommonModule} from '../d-labs-common/d-labs-common.module';
 
 @Module({
     imports: [
         CoreModule,
         DaoModule,
         ServiceModule,
+        DLabsCommonModule,
         WinstonModule.forRoot({
             transports: [
                 new winston.transports.Console({format: winston.format.json()})
