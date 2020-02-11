@@ -1,10 +1,11 @@
 import {NestFactory} from '@nestjs/core';
 import {AppModule} from './app.module';
-
+import {ValidatorInterceptor} from './conf/security/interceptors/ValidatorInterceptor';
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule, {});
     app.setGlobalPrefix(`api/v${process.env.VERSION}`);
+    app.useGlobalPipes(new ValidatorInterceptor());
 
     // const swaggerDocumentsBuilder = new DocumentBuilder()
     //     .setTitle(process.env.PROJECT_NAME)

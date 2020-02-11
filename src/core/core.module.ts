@@ -2,6 +2,7 @@ import {Module} from '@nestjs/common';
 import {TypeOrmModule} from '@nestjs/typeorm';
 import {PortalAccountSequenceGenerator} from './sequenceGenerators/PortalAccountSequenceGenerator';
 import {AppIdSequenceGenerator} from './sequenceGenerators/AppIdSequenceGenerator';
+import {PermissionSequenceGenerator} from './sequenceGenerators/PermissionSequenceGenerator';
 
 @Module({
     imports: [
@@ -10,11 +11,13 @@ import {AppIdSequenceGenerator} from './sequenceGenerators/AppIdSequenceGenerato
     exports: [
         TypeOrmModule,
         PortalAccountSequenceGenerator,
-        AppIdSequenceGenerator
+        AppIdSequenceGenerator,
+        PermissionSequenceGenerator
     ],
     providers: [
         PortalAccountSequenceGenerator,
-        AppIdSequenceGenerator
+        AppIdSequenceGenerator,
+        PermissionSequenceGenerator
     ]
 })
 export class CoreModule {

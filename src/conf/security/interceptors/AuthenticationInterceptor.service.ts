@@ -18,7 +18,6 @@ export class AuthenticationInterceptor implements NestInterceptor {
 
     // @ts-ignore
     async intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-
         const publicAccesstypes = this.reflector.getAll(AccessType.PUBLIC, [
             context.getHandler(), context.getClass()
         ]);

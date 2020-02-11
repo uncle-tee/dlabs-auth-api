@@ -13,9 +13,8 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "tslint -p tsconfig.json -c tslint.json",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:cov": "cross-env jest --coverage",
+    "test": "cross-env TYPEORM_USERNAME=test TYPEORM_PASSWORD=test TYPEORM_DATABASE=test TYPEORM_DROP_SCHEMA=true  TYPEORM_LOGGING=false jest --runInBand",
+    "test:cov": "cross-env TYPEORM_USERNAME=test TYPEORM_PASSWORD=test TYPEORM_DATABASE=test TYPEORM_DROP_SCHEMA=true TYPEORM_LOGGING=false cross-env jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": " cross-env TYPEORM_USERNAME=test TYPEORM_PASSWORD=test TYPEORM_DATABASE=test TYPEORM_DROP_SCHEMA=true  TYPEORM_LOGGING=true jest --config ./src/controller/test/jest-e2e.json"
   },
@@ -30,6 +29,8 @@
     "@types/faker": "^4.1.9",
     "@types/jsonwebtoken": "^8.3.7",
     "bcryptjs": "^2.4.3",
+    "class-transformer": "^0.2.3",
+    "class-validator": "^0.11.0",
     "cls-hooked": "^4.2.2",
     "faker": "^4.1.0",
     "jsonwebtoken": "^8.5.1",
@@ -73,6 +74,9 @@
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
+    "setupFilesAfterEnv": [
+      "../jest.setup.ts"
+    ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
   }
