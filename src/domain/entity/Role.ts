@@ -8,6 +8,4 @@ export class Role extends BaseEntity {
     name: string;
     @Column()
     code: string;
-    @ManyToOne(type => App)
-    app: App;
 }

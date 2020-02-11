@@ -32,38 +32,16 @@ describe('AppController', () => {
 
     });
 
-    describe('/signUp', () => {
-        it('Test sign up route can sign up a user', () => {
-            return request(applicationContext.getHttpServer())
-                .post('/signUp')
-                .set({
-                    'X-APP-CODE': appHeader.code,
-                    'X-APP-TOKEN': appHeader.token,
-                    'Authorisation': appHeader.token
-                })
-                .send(
-                    {
-                        firstName: 'Olueatobi',
-                        lastName: 'Adenekan',
-                        username: 'tadenekan',
-                        gender: 'MALE',
-                        password: 'school',
-                        phoneNumber: faker.phone.phoneNumber(),
-                        email: faker.internet.email()
-
-                    }
-                ).expect(201);
-        });
-
-        it('Test if same user with same user name can exit', () => {
-            return request(applicationContext.getHttpServer())
-                .post('/signUp')
-                .set({
-                    'X-APP-CODE': appHeader.code,
-                    'X-APP-TOKEN': appHeader.token,
-                    'Authorisation': appHeader.token
-                })
-                .send({
+    it('Test sign up route can sign up a user', async () => {
+        await request(applicationContext.getHttpServer())
+            .post('/signUp')
+            .set({
+                'X-APP-CODE': appHeader.code,
+                'X-APP-TOKEN': appHeader.token,
+                'Authorisation': appHeader.token
+            })
+            .send(
+                {
                     firstName: 'Olueatobi',
                     lastName: 'Adenekan',
                     username: 'tadenekan',
@@ -71,43 +49,62 @@ describe('AppController', () => {
                     password: 'school',
                     phoneNumber: faker.phone.phoneNumber(),
                     email: faker.internet.email()
-                }).expect(409);
-        });
 
-        it('Test attributes when user is created', async () => {
-            const firstName = faker.name.firstName();
-            const lastName = faker.name.lastName();
-            const email = faker.internet.email(firstName, lastName);
-            const phoneNumber = faker.phone.phoneNumber();
-            const response = await request(applicationContext.getHttpServer())
-                .post('/signUp')
-                .set({
-                    'X-APP-CODE': appHeader.code,
-                    'X-APP-TOKEN': appHeader.token,
-                    'Authorisation': appHeader.token
-                }).send({
-                    firstName,
-                    lastName,
-                    email,
-                    username: firstName,
-                    phoneNumber,
-                    gender: 'MALE',
-                    password: faker.random.uuid()
-                });
-            expect(response.body.username).toBe(firstName.toLowerCase());
-            expect(response.body.lastName).toBe(lastName);
-            expect(response.body.password).toBeNull();
-            expect(response.body.gender).toBe('MALE');
-            expect(response.body.email).toBe(email);
-            expect(response.body.phoneNumber).toBe(phoneNumber);
-            expect(response.body.firstName).toBe(firstName);
-        });
+                }
+            ).expect(201);
+    });
 
+    it('Test if same user with same user name can exit', async () => {
+      await  request(applicationContext.getHttpServer())
+            .post('/signUp')
+            .set({
+                'X-APP-CODE': appHeader.code,
+                'X-APP-TOKEN': appHeader.token,
+                'Authorisation': appHeader.token
+            })
+            .send({
+                firstName: 'Olueatobi',
+                lastName: 'Adenekan',
+                username: 'tadenekan',
+                gender: 'MALE',
+                password: 'school',
+                phoneNumber: faker.phone.phoneNumber(),
+                email: faker.internet.email()
+            }).expect(409);
+    });
+
+    it('Test attributes when user is created', async () => {
+        const firstName = faker.name.firstName();
+        const lastName = faker.name.lastName();
+        const email = faker.internet.email(firstName, lastName);
+        const phoneNumber = faker.phone.phoneNumber();
+        const response = await request(applicationContext.getHttpServer())
+            .post('/signUp')
+            .set({
+                'X-APP-CODE': appHeader.code,
+                'X-APP-TOKEN': appHeader.token,
+                'Authorisation': appHeader.token
+            }).send({
+                firstName,
+                lastName,
+                email,
+                username: firstName,
+                phoneNumber,
+                gender: 'MALE',
+                password: faker.random.uuid()
+            });
+        expect(response.body.username).toBe(firstName.toLowerCase());
+        expect(response.body.lastName).toBe(lastName);
+        expect(response.body.password).toBeNull();
+        expect(response.body.gender).toBe('MALE');
+        expect(response.body.email).toBe(email);
+        expect(response.body.phoneNumber).toBe(phoneNumber);
+        expect(response.body.firstName).toBe(firstName);
     });
 
     afterAll(async () => {
         await applicationContext.close();
-        //await connection.close();
+        await connection.close();
 
     });
 });
