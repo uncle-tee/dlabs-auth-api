@@ -52,8 +52,9 @@ describe('PermissionController', () => {
     });
 
     afterAll(async () => {
-        await applicationContext.close();
         await connection.close();
+        await applicationContext.close();
+
 
     });
 });
