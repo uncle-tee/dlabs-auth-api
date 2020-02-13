@@ -22,7 +22,6 @@ export class PermissionService {
         return this.connection.transaction(async (entityManager) => {
             return  entityManager.getCustomRepository(PermissionRepository).save(newPermission);
         });
-
     }
 
 }

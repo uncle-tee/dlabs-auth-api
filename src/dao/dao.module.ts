@@ -2,11 +2,18 @@ import {Module} from '@nestjs/common';
 import {PortalUserRepository} from './PortalUserRepository';
 import {AppRepository} from './AppRepository';
 import {PortalAccountRepository} from './PortalAccountRepository';
-import {TypeOrmModule} from '@nestjs/typeorm';
+import {RoleRepository} from './RoleRepository';
 
 @Module({
-    providers: [PortalUserRepository, AppRepository, PortalAccountRepository],
-    exports: [PortalUserRepository, AppRepository, PortalAccountRepository]
+    providers: [
+        PortalUserRepository,
+        AppRepository,
+        PortalAccountRepository,
+        RoleRepository],
+    exports: [PortalUserRepository,
+        AppRepository,
+        PortalAccountRepository,
+        RoleRepository]
 })
 export class DaoModule {
 }

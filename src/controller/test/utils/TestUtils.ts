@@ -5,6 +5,7 @@ import {AppRepository} from '../../../dao/AppRepository';
 import {PortalUserDto} from '../../../dto/portalUser/PortalUserDto';
 import {AuthenticationService} from '../../../service/AuthenticationService';
 import {GenderConstant} from '../../../domain/enums/GenderConstant';
+import {LoginDto} from '../../../dto/auth/LoginDto';
 
 export class TestUtils {
 
@@ -19,17 +20,26 @@ export class TestUtils {
         return this.connection.getCustomRepository(AppRepository).save(app);
     }
 
-    async mockSignUpUser(authenticationService: AuthenticationService, app: App) {
+    // @ts-ignore
+    async mockSignUpUser(authenticationService: AuthenticationService, app: App): PortalUserDto {
         const portalUserDto = new PortalUserDto();
         portalUserDto.username = faker.name.firstName();
-        portalUserDto.phoneNumber = '08162507399';
-        portalUserDto.email = 'tadenekan@gmail.com';
+        portalUserDto.phoneNumber = faker.phone.phoneNumber();
+        portalUserDto.email = faker.internet.email();
         portalUserDto.gender = GenderConstant.MALE;
-        portalUserDto.lastName = 'adenekan';
-        portalUserDto.firstName = 'oluwatobi';
-        portalUserDto.password = 'school';
+        portalUserDto.lastName = faker.name.lastName();
+        portalUserDto.firstName = faker.name.firstName();
+        portalUserDto.password = faker.random.uuid();
         await authenticationService.signUpUser(portalUserDto, app);
         return portalUserDto;
+    }
+
+    async mockLoginUser(authenticationService: AuthenticationService, app: App) {
+        const signUpUser = this.mockSignUpUser(authenticationService, app);
+        const loginDto = new LoginDto();
+        loginDto.username = signUpUser.username;
+        loginDto.password = signUpUser.password;
+        return await authenticationService.loginUser(loginDto, app);
 
     }
 }

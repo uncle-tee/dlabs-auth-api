@@ -6,6 +6,7 @@ import {AuthenticationService} from './AuthenticationService';
 import {DLabsCommonModule} from '../d-labs-common/d-labs-common.module';
 import {ConfModule} from '../conf/conf.module';
 import {PermissionService} from './PermissionService';
+import {RoleService} from './RoleService';
 
 @Module({
     imports: [
@@ -14,10 +15,14 @@ import {PermissionService} from './PermissionService';
         DLabsCommonModule
     ],
     exports: [
-        AuthenticationService, PermissionService
+        AuthenticationService,
+        PermissionService,
+        RoleService
     ],
     providers: [
-        AuthenticationService, PermissionService
+        AuthenticationService,
+        PermissionService,
+        RoleService
     ]
 })
 export class ServiceModule {
