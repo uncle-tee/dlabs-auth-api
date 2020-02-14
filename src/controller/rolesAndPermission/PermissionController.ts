@@ -12,7 +12,6 @@ export class PermissionController {
     }
 
     @Post()
-    @Public()
     async createPermission(@Body() permission: PermissionDto, @Application() app: App) {
         await this.permissionService.createPermission(permission, app);
     }

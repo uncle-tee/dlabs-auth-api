@@ -21,6 +21,7 @@ export class AuthenticationService {
                 private readonly connection: Connection,
                 private readonly portalAccountSequenceGenerator: PortalAccountSequenceGenerator,
                 @Inject('winston') private readonly logger: Logger) {
+
     }
 
     public verifyIncomingRequest = (req: Request) => new Promise((resolve, reject) => {

@@ -6,7 +6,7 @@ import {Reflector} from '@nestjs/core';
 
 @Injectable()
 export class LoggerInterceptor implements NestInterceptor {
-    constructor(private readonly connection: Connection, private readonly reflector: Reflector) {
+    constructor(private readonly reflector: Reflector, private readonly connection: Connection) {
     }
 
     intercept(context: ExecutionContext, next: CallHandler): Observable<any> {

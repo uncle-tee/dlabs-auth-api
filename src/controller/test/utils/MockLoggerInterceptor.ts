@@ -4,21 +4,21 @@ import {Observable} from 'rxjs';
 import {LoggerInterceptor} from '../../../conf/security/interceptors/LoggerInterceptor';
 import {Reflector} from '@nestjs/core';
 import {Connection} from 'typeorm';
+import {AccessType} from '../../../conf/security/accessTypes/AccessType';
 
-export class MockLoggerInterceptor implements NestInterceptor {
-    reflex: Reflector;
-    conn: Connection;
+// @ts-ignore
+export class MockLoggerInterceptor extends LoggerInterceptor {
 
     constructor(private readonly reflector: Reflector, private readonly connection: Connection) {
-        this.reflex = reflector;
-        this.conn = connection;
+        super(reflector, connection);
     }
 
     // @ts-ignore
     async intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-        // tslint:disable-next-line:no-console
-        console.log(context.switchToHttp().getRequest().body);
-        await this.conn.createEntityManager().save(context.switchToHttp().getRequest().body);
+
+        await this.connection.transaction(async (entityManager) => {
+            return entityManager.save(context.switchToHttp().getRequest().body);
+        });
         return next.handle();
     }
 
