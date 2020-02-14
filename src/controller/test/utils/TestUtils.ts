@@ -6,10 +6,15 @@ import {PortalUserDto} from '../../../dto/portalUser/PortalUserDto';
 import {AuthenticationService} from '../../../service/AuthenticationService';
 import {GenderConstant} from '../../../domain/enums/GenderConstant';
 import {LoginDto} from '../../../dto/auth/LoginDto';
+import {ModelFactory} from './ModelFactory';
 
 export class TestUtils {
 
     constructor(private readonly connection: Connection) {
+    }
+
+    getModelFactory(): ModelFactory {
+        return ModelFactory.getInstance(this.connection);
     }
 
     getAuthorisedApp() {

@@ -12,12 +12,15 @@ import {getConnection} from 'typeorm';
 import * as request from 'supertest';
 import {AuthenticationInterceptor} from '../../conf/security/interceptors/AuthenticationInterceptor.service';
 import {MockAuthenticationInterceptor} from './utils/MockAuthenticationInterceptor';
+import {ModelFactory} from './utils/ModelFactory';
+import {AppMock} from './utils/AppMock';
 
 describe('PermissionController', () => {
     let applicationContext: INestApplication;
     let connection: Connection;
     let testUtils: TestUtils;
     let appHeader: App;
+    let modelFactory: ModelFactory;
 
     beforeAll(async () => {
         const moduleRef: TestingModule = await Test.createTestingModule({
@@ -31,6 +34,9 @@ describe('PermissionController', () => {
         connection = getConnection();
         await applicationContext.init();
         testUtils = new TestUtils(connection);
+        modelFactory = testUtils.getModelFactory();
+        // tslint:disable-next-line:no-console
+        console.log(await modelFactory.mockData<App, AppMock>(AppMock).createOne());
         appHeader = await testUtils.getAuthorisedApp();
     });
 
