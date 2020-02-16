@@ -6,15 +6,23 @@ import {PortalUserDto} from '../../../dto/portalUser/PortalUserDto';
 import {AuthenticationService} from '../../../service/AuthenticationService';
 import {GenderConstant} from '../../../domain/enums/GenderConstant';
 import {LoginDto} from '../../../dto/auth/LoginDto';
-import {ModelFactory} from './ModelFactory';
+import {ModelFactory} from '../testLib/contracts/ModelFactory';
+import {ModelFactoryConfig} from '../testLib/ModelFactoryConfig';
+import {ModelFactoryRoster} from '../testLib/factory/ModelFactoryRoster';
 
 export class TestUtils {
 
     constructor(private readonly connection: Connection) {
     }
 
-    getModelFactory(): ModelFactory {
-        return ModelFactory.getInstance(this.connection);
+    initModelFactory(): ModelFactory {
+        // tslint:disable-next-line:no-console
+        console.log('about to regsiter');
+        const modelFactory = ModelFactoryConfig.getInstance(faker, this.connection.createEntityManager());
+        // tslint:disable-next-line:no-console
+        console.log('about to regsiter');
+        ModelFactoryRoster.register(modelFactory);
+        return modelFactory;
     }
 
     getAuthorisedApp() {

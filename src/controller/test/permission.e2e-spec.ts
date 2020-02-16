@@ -12,8 +12,9 @@ import {getConnection} from 'typeorm';
 import * as request from 'supertest';
 import {AuthenticationInterceptor} from '../../conf/security/interceptors/AuthenticationInterceptor.service';
 import {MockAuthenticationInterceptor} from './utils/MockAuthenticationInterceptor';
-import {ModelFactory} from './utils/ModelFactory';
-import {AppMock} from './utils/AppMock';
+import {Permission} from '../../domain/entity/Permission';
+import {ModelFactory} from './testLib/contracts/ModelFactory';
+import {PermissionModelFactory} from './testLib/factory/PermissionModelFactory';
 
 describe('PermissionController', () => {
     let applicationContext: INestApplication;
@@ -34,18 +35,18 @@ describe('PermissionController', () => {
         connection = getConnection();
         await applicationContext.init();
         testUtils = new TestUtils(connection);
-        modelFactory = testUtils.getModelFactory();
+        modelFactory = testUtils.initModelFactory();
         // tslint:disable-next-line:no-console
-        console.log(await modelFactory.mockData<App, AppMock>(AppMock).createOne());
-        appHeader = await testUtils.getAuthorisedApp();
+        console.log(await modelFactory.create<Permission>(PermissionModelFactory.TAG));
+        //  appHeader = await testUtils.getAuthorisedApp();
     });
 
     it('Test of permission can be created', async () => {
-        await request(applicationContext.getHttpServer())
+        request(applicationContext.getHttpServer())
             .post('/permissions')
             .set({
-                'X-APP-CODE': appHeader.code,
-                'X-APP-TOKEN': appHeader.token
+                // 'X-APP-CODE': appHeader.code,
+                // 'X-APP-TOKEN': appHeader.token
             })
             .send(
                 {
