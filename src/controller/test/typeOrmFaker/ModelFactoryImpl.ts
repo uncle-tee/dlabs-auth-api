@@ -2,7 +2,6 @@
 import {EntityManager} from 'typeorm';
 import FakerStatic = Faker.FakerStatic;
 import {FactoryHelper} from './contracts/FactoryHelper';
-import {ClassInstanceFactory} from './ClassInstanceFactory';
 import {EntityFactoryBuilderImpl} from './EntityFactoryBuilderImpl';
 import {EntityFactoryBuilder} from './contracts/EntityFactoryBuilder';
 import {ModelFactory} from './contracts/ModelFactory';
@@ -31,16 +30,20 @@ export class ModelFactoryImpl implements ModelFactory {
         return new EntityFactoryBuilderImpl<T>(factoryTag, this.definitions, this.faker, this, this.entityManager);
     }
 
-    public make<T>(factoryTag: string): T {
-        return this.of<T>(factoryTag).make();
+    public async make<T>(factoryTag: string): Promise<T> {
+        return await this.of<T>(factoryTag).make();
     }
 
-    public makeMany<T>(count: number, factoryTag: string): T[] {
-        return this.of<T>(factoryTag).makeMany(count);
+    public async makeMany<T>(count: number, factoryTag: string) {
+        return await this.of<T>(factoryTag).makeMany(count);
     }
 
     createMany<T>(count: number, factoryTag: string): Promise<T[]> {
         return this.of<T>(factoryTag).createMany(count);
+    }
+
+    upset<Entity>(factoryTag: string): EntityFactoryBuilder<Entity> {
+        return this.of<Entity>(factoryTag);
     }
 
 }

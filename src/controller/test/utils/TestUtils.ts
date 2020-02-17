@@ -6,9 +6,9 @@ import {PortalUserDto} from '../../../dto/portalUser/PortalUserDto';
 import {AuthenticationService} from '../../../service/AuthenticationService';
 import {GenderConstant} from '../../../domain/enums/GenderConstant';
 import {LoginDto} from '../../../dto/auth/LoginDto';
-import {ModelFactory} from '../testLib/contracts/ModelFactory';
-import {ModelFactoryConfig} from '../testLib/ModelFactoryConfig';
-import {ModelFactoryRoster} from '../testLib/factory/ModelFactoryRoster';
+import {ModelFactory} from '../typeOrmFaker/contracts/ModelFactory';
+import {ModelFactoryConfig} from '../typeOrmFaker/ModelFactoryConfig';
+import {ModelFactoryRoster} from './factory/ModelFactoryRoster';
 
 export class TestUtils {
 

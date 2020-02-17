@@ -5,8 +5,10 @@ export interface EntityFactoryBuilder<T> {
 
     createMany(count: number): Promise<T[]>;
 
-    makeMany(count: number): T[];
+    makeMany(count: number): Promise<T[]>
 
-    make(): T;
+    make(): Promise<T>;
+
+    use(callBack: (t: T) => T): EntityFactoryBuilder<T>;
 }
 

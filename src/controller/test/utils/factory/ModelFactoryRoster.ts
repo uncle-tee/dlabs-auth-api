@@ -1,7 +1,7 @@
 /* Oluwatobi Adenekan,mailtobi@dlabs.cloud 15/02/2020 */
 
 import FakerStatic = Faker.FakerStatic;
-import {ModelFactory} from '../contracts/ModelFactory';
+import {ModelFactory} from '../../typeOrmFaker/contracts/ModelFactory';
 import {Permission} from '../../../../domain/entity/Permission';
 import {PermissionModelFactory} from './PermissionModelFactory';
 import {App} from '../../../../domain/entity/App';

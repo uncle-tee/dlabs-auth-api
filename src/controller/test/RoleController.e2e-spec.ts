@@ -33,7 +33,7 @@ describe('RoleController', () => {
     });
     it('Test if role is corrected', async () => {
         await request(applicationContext.getHttpServer())
-            .post('/permissions')
+            .post('/role')
             .set({
                 'X-APP-CODE': appHeader.code,
                 'X-APP-TOKEN': appHeader.token,

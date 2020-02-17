@@ -13,8 +13,9 @@ import * as request from 'supertest';
 import {AuthenticationInterceptor} from '../../conf/security/interceptors/AuthenticationInterceptor.service';
 import {MockAuthenticationInterceptor} from './utils/MockAuthenticationInterceptor';
 import {Permission} from '../../domain/entity/Permission';
-import {ModelFactory} from './testLib/contracts/ModelFactory';
-import {PermissionModelFactory} from './testLib/factory/PermissionModelFactory';
+import {ModelFactory} from './typeOrmFaker/contracts/ModelFactory';
+import {PermissionModelFactory} from './utils/factory/PermissionModelFactory';
+import {AppFactory} from './utils/factory/AppFactory';
 
 describe('PermissionController', () => {
     let applicationContext: INestApplication;
@@ -37,8 +38,14 @@ describe('PermissionController', () => {
         testUtils = new TestUtils(connection);
         modelFactory = testUtils.initModelFactory();
         // tslint:disable-next-line:no-console
-        console.log(await modelFactory.create<Permission>(PermissionModelFactory.TAG));
-        //  appHeader = await testUtils.getAuthorisedApp();
+        const permissionPromise = modelFactory
+            .upset<Permission>(PermissionModelFactory.TAG).use(val => {
+                val.name = 'Raymond';
+                return val;
+            }).makeMany(50);
+        // tslint:disable-next-line:no-console
+        console.log(await permissionPromise);
+
     });
 
     it('Test of permission can be created', async () => {

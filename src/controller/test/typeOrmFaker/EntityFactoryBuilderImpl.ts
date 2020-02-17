@@ -9,7 +9,7 @@ import {FactoryInstantiationException} from './exceptions/FactoryInstantiationEx
 
 export class EntityFactoryBuilderImpl<T> implements EntityFactoryBuilder<T> {
 
-    private operator: FunctionalInterface<T, T>;
+    private operator: (t: T) => T;
 
     constructor(private factoryTag: string,
                 private definitions: Map<any, FactoryHelper<T>>,
@@ -18,9 +18,11 @@ export class EntityFactoryBuilderImpl<T> implements EntityFactoryBuilder<T> {
                 private entityManager: EntityManager) {
     }
 
-    private makeInstance(): T {
+    private makeInstance(): Promise<T> {
         if (!this.definitions.has(this.factoryTag)) {
-            throw new FactoryInstantiationException(`Unable to locate the factory with tag ${this.factoryTag}, Did you register it`);
+            throw new FactoryInstantiationException(`😛 Unable to locate the factory with tag ${this.factoryTag}, Are you sure you registered a factory with a tag?
+            Hint: Implement FactoryHelper<~> and the rest will happen like a magic 🤪
+            `);
         }
         const func: FactoryHelper<T> = this.definitions.get(this.factoryTag);
 
@@ -34,29 +36,36 @@ export class EntityFactoryBuilderImpl<T> implements EntityFactoryBuilder<T> {
 
     }
 
-    createMany(count: number): Promise<T[]> {
-        const persistedInstances = this.makeMany(count).map(async instance => {
-            // return this.entityManager.save(instance);
-            return instance;
+    async createMany(count: number): Promise<T[]> {
+        const persistedInstances = (await this.makeMany(count)).map(instance => {
+            return this.entityManager.save(instance);
         });
-        return Promise.all(persistedInstances);
+        return await Promise.all(persistedInstances);
     }
 
-    public makeMany(count: number): T[] {
+    public async makeMany(count: number): Promise<T[]> {
         const instances: T[] = [];
         for (let i = 0; i < count; i++) {
-            instances.push(this.make());
+            instances.push(await this.make());
         }
 
         return instances;
     }
 
-    public make(): T {
+    public async make(): Promise<T> {
         if (this.operator != null) {
-            return this.operator.apply(this.makeInstance());
+            return this.operator(await this.makeInstance());
         }
-        return this.makeInstance();
+        return await this.makeInstance();
     }
 
-}
+    use(callBack: (t: T) => T): EntityFactoryBuilder<T> {
+        if (this.operator != null) {
+            this.operator = val => callBack(this.operator(val));
+        } else {
+            this.operator = callBack;
+        }
 
+        return this;
+    }
+}
