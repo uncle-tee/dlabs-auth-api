@@ -13,9 +13,8 @@ export class Role extends BaseEntity {
         nullable: false
     })
     code: string;
-    @Column({
-        nullable: false
-    })
+
+    @ManyToOne(type => PortalUser)
     createdBy: PortalUser;
     @Column()
     description: string;
