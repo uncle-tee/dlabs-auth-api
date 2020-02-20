@@ -11,12 +11,17 @@ import * as faker from 'faker';
 import {App} from '../../domain/entity/App';
 import {AppRepository} from '../../dao/AppRepository';
 import {TestUtils} from './utils/TestUtils';
+import {testForBuffer} from 'class-transformer/TransformOperationExecutor';
+import {ModelFactory} from '../../test-starter/orm-faker/contracts/ModelFactory';
+import {AppFactory} from './factory/AppFactory';
+import {PortalUser} from '../../domain/entity/PortalUser';
 
 describe('AppController', () => {
     let applicationContext: INestApplication;
     let connection: Connection;
     let testUtils: TestUtils;
     let appHeader: App;
+    let modelFactory: ModelFactory;
 
     beforeAll(async () => {
         const moduleRef: TestingModule = await Test.createTestingModule({
@@ -28,6 +33,7 @@ describe('AppController', () => {
         await applicationContext.init();
         connection = getConnection();
         testUtils = new TestUtils(connection);
+        modelFactory = testUtils.initModelFactory();
         appHeader = await testUtils.getAuthorisedApp();
 
     });
@@ -55,7 +61,7 @@ describe('AppController', () => {
     });
 
     it('Test if same user with same user name can exit', async () => {
-      await  request(applicationContext.getHttpServer())
+        await request(applicationContext.getHttpServer())
             .post('/signUp')
             .set({
                 'X-APP-CODE': appHeader.code,
@@ -102,10 +108,27 @@ describe('AppController', () => {
         expect(response.body.firstName).toBe(firstName);
     });
 
+    it('It test that only one unique username or password can exist on an app', () => {
+        return request(applicationContext.getHttpServer())
+            .post('/signup')
+            .set({
+                'X-APP-CODE': appHeader.code,
+                'X-APP-TOKEN': appHeader.token,
+                'Authorisation': appHeader.token
+            }).expect(409);
+    });
+
+    it('Test that a portal user cannot login with the another app credentials', async () => {
+        const app = await modelFactory.create<App>(AppFactory.TAG);
+        modelFactory.create<PortalUser>()
+        return request(applicationContext.getHttpServer())
+            .post('signup')
+            .set({});
+    });
+
     afterAll(async () => {
         await connection.close();
         await applicationContext.close();
-
 
     });
 });

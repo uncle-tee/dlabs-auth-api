@@ -1,16 +1,15 @@
 /* Oluwatobi Adenekan,mailtobi@dlabs.cloud 15/02/2020 */
-import {EntityManager} from 'typeorm';
 import FakerStatic = Faker.FakerStatic;
 import {FactoryHelper} from './contracts/FactoryHelper';
 import {EntityFactoryBuilderImpl} from './EntityFactoryBuilderImpl';
 import {EntityFactoryBuilder} from './contracts/EntityFactoryBuilder';
 import {ModelFactory} from './contracts/ModelFactory';
+import {OrmAdapter} from './contracts/OrmAdapter';
 
 export class ModelFactoryImpl implements ModelFactory {
+    private definitions: Map<string, any> = new Map<string, FactoryHelper<any>>();
 
-    private definitions: Map<string, any> = new Map<any, FactoryHelper<any>>();
-
-    constructor(private faker: FakerStatic, private entityManager: EntityManager) {
+    constructor(private faker: FakerStatic, private ormAdapter: OrmAdapter) {
     }
 
     public register<Entity, Mocker extends FactoryHelper<Entity>>(type: (new () => Mocker)) {
@@ -27,7 +26,7 @@ export class ModelFactoryImpl implements ModelFactory {
     }
 
     private of<T>(factoryTag: string): EntityFactoryBuilder<T> {
-        return new EntityFactoryBuilderImpl<T>(factoryTag, this.definitions, this.faker, this, this.entityManager);
+        return new EntityFactoryBuilderImpl<T>(factoryTag, this.definitions, this.faker, this, this.ormAdapter);
     }
 
     public async make<T>(factoryTag: string): Promise<T> {

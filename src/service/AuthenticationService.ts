@@ -50,11 +50,11 @@ export class AuthenticationService {
 
         return this.connection.transaction(async (entityManager) => {
 
-            let portalAccount = null;
+            let portalAccount: PortalAccount = null;
 
             if (userDto.portalAccountName) {
                 portalAccount = await entityManager.getCustomRepository(PortalAccountRepository).findOneItem({
-                    name: userDto.username
+                    name: userDto.portalAccountName
                 });
                 if (portalAccount) {
                     throw new NotFoundException(`Portal account with name cannot be found ${userDto.portalAccountName}`);
@@ -78,7 +78,7 @@ export class AuthenticationService {
 
             const portalUserWithUsername: number = await entityManager
                 .getCustomRepository(PortalUserRepository)
-                .countPortalUserUserNameByApp(userDto.username, portalAccount, portalAccount);
+                .countPortalUserUserNameByApp(userDto.username, app, portalAccount);
 
             if (portalUserWithUsername) {
                 throw new ConflictException('User name already Exist');

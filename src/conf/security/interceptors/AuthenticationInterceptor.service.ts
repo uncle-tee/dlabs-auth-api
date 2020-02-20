@@ -33,7 +33,8 @@ export class AuthenticationInterceptor implements NestInterceptor {
             throw new UnauthorizedException('Authorisation header is not provided');
         }
         await this.authenticationService
-            .verifyIncomingRequest(request).then((decoded: { sub: string }) => {
+            .verifyIncomingRequest(request)
+            .then((decoded: { sub: string }) => {
                 return this.connection.getCustomRepository(PortalUserRepository).findOneItem({
                     id: Number(decoded.sub)
                 });

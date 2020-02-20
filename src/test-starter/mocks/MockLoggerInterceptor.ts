@@ -1,10 +1,10 @@
-import {AuthenticationInterceptor} from '../../../conf/security/interceptors/AuthenticationInterceptor.service';
+import {AuthenticationInterceptor} from '../../conf/security/interceptors/AuthenticationInterceptor.service';
 import {CallHandler, ExecutionContext, NestInterceptor, UnauthorizedException} from '@nestjs/common';
 import {Observable} from 'rxjs';
-import {LoggerInterceptor} from '../../../conf/security/interceptors/LoggerInterceptor';
+import {LoggerInterceptor} from '../../conf/security/interceptors/LoggerInterceptor';
 import {Reflector} from '@nestjs/core';
 import {Connection} from 'typeorm';
-import {AccessType} from '../../../conf/security/accessTypes/AccessType';
+import {AccessType} from '../../conf/security/accessTypes/AccessType';
 
 // @ts-ignore
 export class MockLoggerInterceptor extends LoggerInterceptor {

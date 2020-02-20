@@ -1,10 +1,9 @@
 /* Oluwatobi Adenekan,mailtobi@dlabs.cloud 15/02/2020 */
-import {FactoryHelper} from '../../typeOrmFaker/contracts/FactoryHelper';
-import {Permission} from '../../../../domain/entity/Permission';
-import {ModelFactory} from '../../typeOrmFaker/contracts/ModelFactory';
+import {FactoryHelper} from '../../../test-starter/orm-faker/contracts/FactoryHelper';
+import {Permission} from '../../../domain/entity/Permission';
+import {ModelFactory} from '../../../test-starter/orm-faker/contracts/ModelFactory';
 import FakerStatic = Faker.FakerStatic;
 import {AppFactory} from './AppFactory';
-import {App} from '../../../../domain/entity/App';
 
 export class PermissionModelFactory implements FactoryHelper<Permission> {
 

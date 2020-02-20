@@ -1,11 +1,10 @@
 /* Oluwatobi Adenekan,mailtobi@dlabs.cloud 15/02/2020 */
 import {EntityFactoryBuilder} from './contracts/EntityFactoryBuilder';
 import FakerStatic = Faker.FakerStatic;
-import {EntityManager} from 'typeorm';
-import {FunctionalInterface} from './contracts/FunctionalInterface';
 import {FactoryHelper} from './contracts/FactoryHelper';
 import {ModelFactory} from './contracts/ModelFactory';
 import {FactoryInstantiationException} from './exceptions/FactoryInstantiationException';
+import {OrmAdapter} from './contracts/OrmAdapter';
 
 export class EntityFactoryBuilderImpl<T> implements EntityFactoryBuilder<T> {
 
@@ -15,7 +14,7 @@ export class EntityFactoryBuilderImpl<T> implements EntityFactoryBuilder<T> {
                 private definitions: Map<any, FactoryHelper<T>>,
                 private faker: FakerStatic,
                 private modelFactory: ModelFactory,
-                private entityManager: EntityManager) {
+                private ormAdapter: OrmAdapter) {
     }
 
     private makeInstance(): Promise<T> {
@@ -38,7 +37,7 @@ export class EntityFactoryBuilderImpl<T> implements EntityFactoryBuilder<T> {
 
     async createMany(count: number): Promise<T[]> {
         const persistedInstances = (await this.makeMany(count)).map(instance => {
-            return this.entityManager.save(instance);
+            return this.ormAdapter.save(instance);
         });
         return await Promise.all(persistedInstances);
     }
