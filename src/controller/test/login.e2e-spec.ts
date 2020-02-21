@@ -1,6 +1,6 @@
 import {INestApplication} from '@nestjs/common';
 import {Connection} from 'typeorm/connection/Connection';
-import {TestUtils} from './utils/TestUtils';
+import {TestUtils} from '../../test-starter/config/TestUtils';
 import {App} from '../../domain/entity/App';
 import {Test, TestingModule} from '@nestjs/testing';
 import {AppModule} from '../../app.module';

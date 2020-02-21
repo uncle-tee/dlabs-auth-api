@@ -1,7 +1,7 @@
 /* Oluwatobi Adenekan,mailtobi@dlabs.cloud 16/02/2020 */
-import {FactoryHelper} from '../../../test-starter/orm-faker/contracts/FactoryHelper';
-import {App} from '../../../domain/entity/App';
-import {ModelFactory} from '../../../test-starter/orm-faker/contracts/ModelFactory';
+import {FactoryHelper} from '../orm-faker/contracts/FactoryHelper';
+import {App} from '../../domain/entity/App';
+import {ModelFactory} from '../orm-faker/contracts/ModelFactory';
 
 export class AppFactory implements FactoryHelper<App> {
     public static TAG: string = 'APP';

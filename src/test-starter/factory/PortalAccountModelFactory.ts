@@ -1,13 +1,13 @@
 /* Oluwatobi Adenekan,mailtobi@dlabs.cloud 19/02/2020 */
 
-import {FactoryHelper} from '../../../test-starter/orm-faker/contracts/FactoryHelper';
-import {PortalAccount} from '../../../domain/entity/PortalAccount';
-import {ModelFactory} from '../../../test-starter/orm-faker/contracts/ModelFactory';
+import {FactoryHelper} from '../orm-faker/contracts/FactoryHelper';
+import {PortalAccount} from '../../domain/entity/PortalAccount';
+import {ModelFactory} from '../orm-faker/contracts/ModelFactory';
 import {AppFactory} from './AppFactory';
-import {GenericStatusConstant} from '../../../domain/enums/GenericStatusConstant';
+import {GenericStatusConstant} from '../../domain/enums/GenericStatusConstant';
 
 export class PortalAccountModelFactory implements FactoryHelper<PortalAccount> {
-    public static TAG;
+    public static TAG = 'PORTAL_ACCOUNT';
 
     async apply(faker: Faker.FakerStatic, modelFactory: ModelFactory): Promise<PortalAccount> {
         const portalAccount = new PortalAccount();

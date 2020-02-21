@@ -22,6 +22,8 @@ export class RoleService {
             const role = new Role();
             role.name = roleDto.name;
             role.code = await this.roleCodeSequenceGenerator.next();
+            // tslint:disable-next-line:no-console
+            console.log(requestPrincipal);
             role.createdBy = requestPrincipal.portalUser;
             const newRole = await entityManager.save(role);
             return permissions.map(permission => {

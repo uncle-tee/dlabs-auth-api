@@ -22,6 +22,9 @@ export class ModelFactoryImpl implements ModelFactory {
     }
 
     public create<T>(factoryTag: string): Promise<T> {
+        if (!factoryTag) {
+            throw Error('Factory tag cannot be undefined when creating a factory');
+        }
         return this.of<T>(factoryTag).create();
     }
 

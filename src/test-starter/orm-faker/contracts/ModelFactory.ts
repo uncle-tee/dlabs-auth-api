@@ -3,7 +3,7 @@ import {FactoryHelper} from './FactoryHelper';
 import {EntityFactoryBuilder} from './EntityFactoryBuilder';
 
 export interface ModelFactory {
-    create<T = any>(factoryTag: string): Promise<T>;
+    create<T>(factoryTag: string): Promise<T>;
 
     register<Entity, Mocker extends FactoryHelper<Entity>>(type: (new () => Mocker));
 
@@ -16,4 +16,3 @@ export interface ModelFactory {
     make<T>(factoryTag: string): Promise<T>;
 
 }
-

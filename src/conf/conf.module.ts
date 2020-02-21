@@ -23,20 +23,23 @@ import {ValidatorInterceptor} from './security/interceptors/ValidatorInterceptor
             ]
         })],
     exports: [],
-    providers: [{
-        provide: APP_INTERCEPTOR,
-        useExisting: LoggerInterceptor
-    },
+    providers: [
+        {
+            provide: APP_INTERCEPTOR,
+            useExisting: LoggerInterceptor
+        },
         LoggerInterceptor,
         {
             provide: APP_INTERCEPTOR,
-            useClass: AppInterceptor
+            useExisting: AppInterceptor
         },
+        AppInterceptor,
         {
             provide: APP_INTERCEPTOR,
             useExisting: AuthenticationInterceptor
         },
-        AuthenticationInterceptor, {
+        AuthenticationInterceptor,
+        {
             provide: APP_INTERCEPTOR,
             useClass: ValidatorInterceptor
         }]
