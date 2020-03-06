@@ -50,6 +50,11 @@ export class TestUtils {
 
     }
 
+    async mockNewSignUpUser(authenticationService: AuthenticationService, app: App): Promise<PortalUserDto> {
+        this.portalUserDto = null;
+        return this.mockSignUpUser(authenticationService, app);
+    }
+
     async mockSignUpUser(authenticationService: AuthenticationService, app: App): Promise<PortalUserDto> {
 
         if (!this.portalUserDto) {

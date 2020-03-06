@@ -42,7 +42,7 @@ describe('RoleController', () => {
             }).createMany(5);
 
     });
-    it('Test that permission code are from the same app', async () => {
+    it('That that user cannot create role if the permissions codes are not on the app.', async () => {
         const permissionCodes = (await testUtils
             .initModelFactory()
             .createMany<Permission>(5, PermissionModelFactory.TAG))

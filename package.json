@@ -13,7 +13,7 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/src/main",
     "lint": "tslint -p tsconfig.json -c tslint.json",
-    "test": "cross-env TYPEORM_USERNAME=test TYPEORM_PASSWORD=test TYPEORM_DATABASE=test TYPEORM_DRO_SCHEMA=true  TYPEORM_LOGGING=false jest --runInBand",
+    "test": "cross-env TYPEORM_USERNAME=test TYPEORM_PASSWORD=test TYPEORM_DATABASE=test TYPEORM_DROP_SCHEMA=true  TYPEORM_LOGGING=false jest --runInBand",
     "test:cov": "cross-env TYPEORM_USERNAME=test TYPEORM_PASSWORD=test TYPEORM_DATABASE=test TYPEORM_DROP_SCHEMA=true TYPEORM_LOGGING=false cross-env jest  --runInBand --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": " cross-env TYPEORM_USERNAME=test TYPEORM_PASSWORD=test TYPEORM_DATABASE=test TYPEORM_DROP_SCHEMA=true  TYPEORM_LOGGING=false jest  --runInBand --config ./src/controller/test/jest-e2e.json"

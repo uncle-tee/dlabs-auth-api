@@ -12,14 +12,17 @@ import {ServiceModule} from '../../service/service.module';
 import {AuthenticationService} from '../../service/AuthenticationService';
 import {GenericStatusConstant} from '../../domain/enums/GenericStatusConstant';
 import {TestUtils} from './utils/TestUtils';
+import {AppFactory} from '../../test-starter/factory/AppFactory';
+import {ModelFactory} from '../../test-starter/orm-faker/contracts/ModelFactory';
 
-describe('AuthController', () => {
+describe('AuthController(Login)', () => {
     let applicationContext: INestApplication;
     let connection: Connection;
     let testUtils: TestUtils;
     let authApp: App;
     let signedUpUser: PortalUserDto;
     let authenticationService: AuthenticationService;
+    let modelFactory: ModelFactory;
 
     beforeAll(async () => {
         const moduleRef: TestingModule = await Test.createTestingModule({
@@ -33,6 +36,7 @@ describe('AuthController', () => {
         await applicationContext.init();
         testUtils = TestUtils.getInstance(connection);
         authApp = await testUtils.getAuthorisedApp();
+        modelFactory = testUtils.initModelFactory();
         signedUpUser = await testUtils.mockSignUpUser(authenticationService, authApp);
 
     });
@@ -54,7 +58,7 @@ describe('AuthController', () => {
             ).expect(201);
     });
 
-    it('Test that Authorised user cannot log in', async () => {
+    it('Test that Authorised user cannot log in with wrong details', async () => {
         await request(applicationContext.getHttpServer())
             .post('/login')
             .set({
@@ -71,7 +75,7 @@ describe('AuthController', () => {
             ).expect(401);
     });
 
-    it('Test a user user can login with password', () => {
+    it('Test a user user can login with email and  password', () => {
         return request(applicationContext.getHttpServer())
             .post('/login')
             .set({
@@ -81,6 +85,18 @@ describe('AuthController', () => {
                 username: signedUpUser.email,
                 password: signedUpUser.password,
             }).expect(201);
+    });
+
+    it('Test that are user can login in with username and password', () => {
+        return request(applicationContext.getHttpServer()).post('/login')
+            .set({
+                'X-APP-CODE': authApp.code,
+                'X-APP-TOKEN': authApp.token
+            }).send({
+                username: signedUpUser.username,
+                password: signedUpUser.password,
+            })
+            .expect(201);
     });
 
     it('Test that a logged in user can get is full information', async () => {
@@ -95,7 +111,7 @@ describe('AuthController', () => {
         expect(response.body.portalUser.lastName).toEqual(signedUpUser.lastName);
         expect(response.body.portalUser.gender).toEqual(signedUpUser.gender.toString());
         expect(response.body.portalUser.username).toEqual(signedUpUser.username.toLowerCase());
-        expect(response.body.portalUser.email).toEqual(signedUpUser.email);
+        expect(response.body.portalUser.email).toEqual(signedUpUser.email.toLowerCase());
         expect(response.body.portalUser.phoneNumber).toEqual(signedUpUser.phoneNumber);
         expect(response.body.portalUser.status).toEqual(GenericStatusConstant.ACTIVE);
     });
@@ -107,6 +123,22 @@ describe('AuthController', () => {
                 'X-APP-TOKEN': authApp.token,
                 'Authorisation': authApp.token
             }).expect(404);
+    });
+
+    it('Test that a portal user cannot login with the another app credentials', async () => {
+
+        const app = await modelFactory.create<App>(AppFactory.TAG);
+        const portalUser = await testUtils
+            .mockNewSignUpUser(authenticationService, app);
+        return request(applicationContext.getHttpServer())
+            .post('/login')
+            .set({
+                'X-APP-CODE': authApp.code,
+                'X-APP-TOKEN': authApp.token
+            }).send({
+                username: portalUser.username,
+                password: portalUser.password,
+            }).expect(401);
     });
 
     afterAll(async () => {

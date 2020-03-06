@@ -19,4 +19,9 @@ export class Role extends BaseEntity {
     @Column()
     description: string;
 
+    @ManyToOne(type => App, {
+        nullable: false
+    })
+    app: App;
+
 }
