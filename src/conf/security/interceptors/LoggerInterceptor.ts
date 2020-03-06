@@ -1,15 +1,15 @@
 import {CallHandler, ExecutionContext, Inject, Injectable, NestInterceptor} from '@nestjs/common';
 import {Observable} from 'rxjs';
 import {Logger} from 'winston';
+import {Connection} from 'typeorm';
+import {Reflector} from '@nestjs/core';
 
 @Injectable()
 export class LoggerInterceptor implements NestInterceptor {
-    constructor(@Inject('winston') private readonly logger: Logger) {
+    constructor(private readonly reflector: Reflector, private readonly connection: Connection) {
     }
 
     intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-        // tslint:disable-next-line:no-console
-        console.log(context.switchToHttp().getRequest().body);
         return next.handle();
     }
 }

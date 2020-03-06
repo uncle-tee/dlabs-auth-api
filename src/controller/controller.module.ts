@@ -5,6 +5,7 @@ import {CoreModule} from '../core/core.module';
 import {DLabsCommonModule} from '../d-labs-common/d-labs-common.module';
 import {AuthenticationController} from './authentication/AuthenticationController';
 import {PermissionController} from './rolesAndPermission/PermissionController';
+import {RolesController} from './rolesAndPermission/RolesController';
 
 @Module({
     imports: [
@@ -13,7 +14,10 @@ import {PermissionController} from './rolesAndPermission/PermissionController';
         CoreModule,
         DLabsCommonModule
     ],
-    controllers: [AuthenticationController, PermissionController]
+    controllers: [AuthenticationController,
+        PermissionController,
+        RolesController
+    ]
 })
 export class ControllerModule {
 }

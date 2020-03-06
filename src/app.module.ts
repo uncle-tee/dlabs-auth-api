@@ -13,6 +13,7 @@ import {ConfModule} from './conf/conf.module';
 import {APP_GUARD, APP_INTERCEPTOR} from '@nestjs/core';
 import {AppInterceptor} from './conf/security/interceptors/AppInterceptor';
 import {LoggerInterceptor} from './conf/security/interceptors/LoggerInterceptor';
+import {TestStarterModule} from './test-starter/test-starter.module';
 
 @Module({
     imports: [DomainModule, CoreModule,
@@ -22,6 +23,7 @@ import {LoggerInterceptor} from './conf/security/interceptors/LoggerInterceptor'
         ConfigModule.forRoot({
             isGlobal: true
         }),
+        TestStarterModule,
         WinstonModule.forRoot({}),
         ConfModule
     ]

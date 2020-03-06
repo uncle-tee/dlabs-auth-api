@@ -34,6 +34,8 @@ export class PortalUserRepository extends BaseRepository<PortalUser> {
         return this.queryPortalUserUserNameByApp(username, app, portalAccount).getCount();
     }
 
+
+
     queryEmailByApp(email: string, app: App, portalAccount?: PortalAccount) {
         const portalUserSelectQueryBuilder = this.createQueryBuilder('portalUser')
             .select()

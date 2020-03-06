@@ -28,8 +28,13 @@ export class AuthenticationInterceptor implements NestInterceptor {
 
         const request = context.switchToHttp().getRequest();
         const ip = request.headers['x-forwarded-for'] || request.connection.remoteAddress;
+        const authorisationHeader = request.headers.authorization;
+        if (!authorisationHeader) {
+            throw new UnauthorizedException('Authorisation header is not provided');
+        }
         await this.authenticationService
-            .verifyIncomingRequest(request).then((decoded: { sub: string }) => {
+            .verifyIncomingRequest(request)
+            .then((decoded: { sub: string }) => {
                 return this.connection.getCustomRepository(PortalUserRepository).findOneItem({
                     id: Number(decoded.sub)
                 });

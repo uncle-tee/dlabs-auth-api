@@ -6,9 +6,13 @@ import {Permission} from './Permission';
 @Entity()
 export class RolePermission extends BaseEntity {
 
-    @ManyToOne(type => Role)
+    @ManyToOne(type => Role, {
+        nullable: false
+    })
     role: Role;
 
-    @ManyToOne(type => Permission)
+    @ManyToOne(type => Permission, {
+        nullable: false
+    })
     permission: Permission;
 }

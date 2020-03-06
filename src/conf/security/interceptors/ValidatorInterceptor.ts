@@ -1,10 +1,11 @@
-import {ArgumentMetadata, BadRequestException, CallHandler, ExecutionContext, NestInterceptor, PipeTransform} from '@nestjs/common';
+import {ArgumentMetadata, BadRequestException, CallHandler, ExecutionContext, Injectable, NestInterceptor, PipeTransform} from '@nestjs/common';
 import {Observable} from 'rxjs';
 import {plainToClass} from 'class-transformer';
 import {validate, ValidationError} from 'class-validator';
 import {PortalUser} from '../../../domain/entity/PortalUser';
 import {LoginDto} from '../../../dto/auth/LoginDto';
 
+@Injectable()
 export class ValidatorInterceptor implements PipeTransform<any> {
 
     async transform(value: any, metadata: ArgumentMetadata): Promise<any> {

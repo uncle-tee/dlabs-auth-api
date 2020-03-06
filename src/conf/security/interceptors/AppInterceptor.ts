@@ -21,12 +21,14 @@ export class AppInterceptor implements NestInterceptor {
         const request = context.switchToHttp().getRequest();
         const token = request.header('X-APP-TOKEN');
         const code = request.header('X-APP-CODE');
+        if (!token || !code) {
+            throw new UnauthorizedException('Token and code must be provided');
+        }
         const app = await this.connection.getCustomRepository(AppRepository).findOneItem({
             token, code
         });
 
         if (!app) {
-
             throw new UnauthorizedException('Only Authorised app can have access');
         }
 

@@ -4,7 +4,7 @@ import {AuthenticationService} from '../../service/AuthenticationService';
 import {PortalUserDto} from '../../dto/portalUser/PortalUserDto';
 import {Public} from '../../conf/security/annotations/public';
 import {App} from '../../domain/entity/App';
-import {App as Application} from '../decorators/App';
+import {AppContext as Application} from '../decorators/AppContext';
 import {Request} from 'express';
 import {LoginDto} from '../../dto/auth/LoginDto';
 import {LoginResponse} from '../../dto/auth/LoginResponse';

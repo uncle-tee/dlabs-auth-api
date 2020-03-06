@@ -21,6 +21,7 @@ export class AuthenticationService {
                 private readonly connection: Connection,
                 private readonly portalAccountSequenceGenerator: PortalAccountSequenceGenerator,
                 @Inject('winston') private readonly logger: Logger) {
+
     }
 
     public verifyIncomingRequest = (req: Request) => new Promise((resolve, reject) => {
@@ -49,14 +50,14 @@ export class AuthenticationService {
 
         return this.connection.transaction(async (entityManager) => {
 
-            let portalAccount = null;
+            let portalAccount: PortalAccount = null;
 
-            if (userDto.portalAccountName) {
+            if (userDto.accountId) {
                 portalAccount = await entityManager.getCustomRepository(PortalAccountRepository).findOneItem({
-                    name: userDto.username
+                    accountId: userDto.accountId
                 });
                 if (portalAccount) {
-                    throw new NotFoundException(`Portal account with name cannot be found ${userDto.portalAccountName}`);
+                    throw new NotFoundException(`Portal account with name cannot be found ${userDto.accountId}`);
                 }
             } else {
                 const existingPortalAccount = await entityManager.getCustomRepository(PortalAccountRepository).findOneItem({
@@ -77,7 +78,7 @@ export class AuthenticationService {
 
             const portalUserWithUsername: number = await entityManager
                 .getCustomRepository(PortalUserRepository)
-                .countPortalUserUserNameByApp(userDto.username, portalAccount, portalAccount);
+                .countPortalUserUserNameByApp(userDto.username, app, portalAccount);
 
             if (portalUserWithUsername) {
                 throw new ConflictException('User name already Exist');
@@ -91,7 +92,7 @@ export class AuthenticationService {
             }
 
             if (!portalAccount) {
-                throw new NotFoundException(`Portal account with id ${userDto.portalAccountName} cannot be found`);
+                throw new NotFoundException(`Portal account with id ${userDto.accountId} cannot be found`);
             }
             const portalUser = new PortalUser();
             portalUser.firstName = userDto.firstName;

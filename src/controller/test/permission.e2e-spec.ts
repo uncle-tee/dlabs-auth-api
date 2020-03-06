@@ -2,23 +2,20 @@ import {INestApplication} from '@nestjs/common';
 import {Connection} from 'typeorm/connection/Connection';
 import {TestUtils} from './utils/TestUtils';
 import {App} from '../../domain/entity/App';
-import {PortalUserDto} from '../../dto/portalUser/PortalUserDto';
-import {AuthenticationService} from '../../service/AuthenticationService';
 import {Test, TestingModule} from '@nestjs/testing';
 import {AppModule} from '../../app.module';
-import {AppService} from '../../app.service';
-import {ServiceModule} from '../../service/service.module';
 import {getConnection} from 'typeorm';
 import * as request from 'supertest';
-import * as faker from 'faker';
-import {NestFactory} from '@nestjs/core';
+import {ModelFactory} from '../../test-starter/orm-faker/contracts/ModelFactory';
+import {Permission} from '../../domain/entity/Permission';
+import {PermissionModelFactory} from '../../test-starter/factory/PermissionModelFactory';
 
 describe('PermissionController', () => {
     let applicationContext: INestApplication;
     let connection: Connection;
     let testUtils: TestUtils;
-    let appHeader: App;
-    let authenticationService: AuthenticationService;
+    let authApp: App;
+    let modelFactory: ModelFactory;
 
     beforeAll(async () => {
         const moduleRef: TestingModule = await Test.createTestingModule({
@@ -26,22 +23,20 @@ describe('PermissionController', () => {
         }).compile();
 
         applicationContext = moduleRef.createNestApplication();
-        authenticationService = applicationContext
-            .select(ServiceModule)
-            .get(AuthenticationService, {strict: true});
         connection = getConnection();
         await applicationContext.init();
-        testUtils = new TestUtils(connection);
-        appHeader = await testUtils.getAuthorisedApp();
+        testUtils = TestUtils.getInstance(connection);
+        modelFactory = testUtils.initModelFactory();
+        authApp = await testUtils.getAuthorisedApp();
 
     });
-    it('Test of permission can be created', async () => {
-        await request(applicationContext.getHttpServer())
+
+    it('Test of permission can be created', () => {
+        return request(applicationContext.getHttpServer())
             .post('/permissions')
             .set({
-                'X-APP-CODE': appHeader.code,
-                'X-APP-TOKEN': appHeader.token,
-                'Authorisation': appHeader.token
+                'X-APP-CODE': authApp.code,
+                'X-APP-TOKEN': authApp.token
             })
             .send(
                 {
@@ -54,7 +49,6 @@ describe('PermissionController', () => {
     afterAll(async () => {
         await connection.close();
         await applicationContext.close();
-
 
     });
 });
