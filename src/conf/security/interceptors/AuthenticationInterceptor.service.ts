@@ -28,7 +28,7 @@ export class AuthenticationInterceptor implements NestInterceptor {
 
         const request = context.switchToHttp().getRequest();
         const ip = request.headers['x-forwarded-for'] || request.connection.remoteAddress;
-        const authorisationHeader = request.headers.Authorisation;
+        const authorisationHeader = request.headers.authorization;
         if (!authorisationHeader) {
             throw new UnauthorizedException('Authorisation header is not provided');
         }

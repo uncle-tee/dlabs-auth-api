@@ -28,7 +28,6 @@ export class AppInterceptor implements NestInterceptor {
             token, code
         });
 
-        // tslint:disable-next-line:no-console
         if (!app) {
             throw new UnauthorizedException('Only Authorised app can have access');
         }

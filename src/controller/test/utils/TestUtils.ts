@@ -4,51 +4,71 @@ import * as faker from 'faker';
 import {AppRepository} from '../../../dao/AppRepository';
 import {PortalUserDto} from '../../../dto/portalUser/PortalUserDto';
 import {AuthenticationService} from '../../../service/AuthenticationService';
+import {ModelFactoryConfig} from '../typeOrmFaker/ModelFactoryConfig';
+import {ModelFactory} from '../../../test-starter/orm-faker/contracts/ModelFactory';
+import {ModelFactoryRoster} from '../../../test-starter/factory/ModelFactoryRoster';
 import {GenderConstant} from '../../../domain/enums/GenderConstant';
 import {LoginDto} from '../../../dto/auth/LoginDto';
-import {ModelFactory} from '../typeOrmFaker/contracts/ModelFactory';
-import {ModelFactoryConfig} from '../typeOrmFaker/ModelFactoryConfig';
-import {ModelFactoryRoster} from './factory/ModelFactoryRoster';
 
 export class TestUtils {
 
-    constructor(private readonly connection: Connection) {
+    private static instance = null;
+    private app = null;
+    private portalUserDto = null;
+
+    private constructor(private readonly connection: Connection) {
+
+    }
+
+    public static getInstance(connection: Connection): TestUtils {
+        if (this.instance == null) {
+            this.instance = new TestUtils(connection);
+        }
+        return this.instance;
     }
 
     initModelFactory(): ModelFactory {
-        // tslint:disable-next-line:no-console
-        console.log('about to regsiter');
+
         const modelFactory = ModelFactoryConfig.getInstance(faker, this.connection.createEntityManager());
-        // tslint:disable-next-line:no-console
-        console.log('about to regsiter');
         ModelFactoryRoster.register(modelFactory);
         return modelFactory;
     }
 
-    getAuthorisedApp() {
-        const app = new App();
-        app.code = faker.random.uuid();
-        app.token = faker.random.uuid();
-        app.name = faker.name.firstName();
-        return this.connection.getCustomRepository(AppRepository).save(app);
+    async getAuthorisedApp(): Promise<App> {
+
+        if (this.app == null) {
+            this.app = new App();
+            this.app.code = faker.random.uuid();
+            this.app.token = faker.random.uuid();
+            this.app.name = faker.name.firstName();
+            this.app = await this.connection
+                .getCustomRepository(AppRepository)
+                .save(this.app);
+        }
+
+        return this.app;
+
     }
 
-    // @ts-ignore
-    async mockSignUpUser(authenticationService: AuthenticationService, app: App): PortalUserDto {
-        const portalUserDto = new PortalUserDto();
-        portalUserDto.username = faker.name.firstName();
-        portalUserDto.phoneNumber = faker.phone.phoneNumber();
-        portalUserDto.email = faker.internet.email();
-        portalUserDto.gender = GenderConstant.MALE;
-        portalUserDto.lastName = faker.name.lastName();
-        portalUserDto.firstName = faker.name.firstName();
-        portalUserDto.password = faker.random.uuid();
-        await authenticationService.signUpUser(portalUserDto, app);
-        return portalUserDto;
+    async mockSignUpUser(authenticationService: AuthenticationService, app: App): Promise<PortalUserDto> {
+
+        if (!this.portalUserDto) {
+            this.portalUserDto = new PortalUserDto();
+            this.portalUserDto.username = faker.name.firstName();
+            this.portalUserDto.phoneNumber = faker.phone.phoneNumber();
+            this.portalUserDto.email = faker.internet.email();
+            this.portalUserDto.gender = GenderConstant.MALE;
+            this.portalUserDto.lastName = faker.name.lastName();
+            this.portalUserDto.firstName = faker.name.firstName();
+            this.portalUserDto.password = faker.random.uuid();
+            await authenticationService.signUpUser(this.portalUserDto, app);
+        }
+        return this.portalUserDto;
+
     }
 
     async mockLoginUser(authenticationService: AuthenticationService, app: App) {
-        const signUpUser = this.mockSignUpUser(authenticationService, app);
+        const signUpUser = await this.mockSignUpUser(authenticationService, app);
         const loginDto = new LoginDto();
         loginDto.username = signUpUser.username;
         loginDto.password = signUpUser.password;

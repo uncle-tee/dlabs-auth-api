@@ -52,12 +52,12 @@ export class AuthenticationService {
 
             let portalAccount: PortalAccount = null;
 
-            if (userDto.portalAccountName) {
+            if (userDto.accountId) {
                 portalAccount = await entityManager.getCustomRepository(PortalAccountRepository).findOneItem({
-                    name: userDto.portalAccountName
+                    accountId: userDto.accountId
                 });
                 if (portalAccount) {
-                    throw new NotFoundException(`Portal account with name cannot be found ${userDto.portalAccountName}`);
+                    throw new NotFoundException(`Portal account with name cannot be found ${userDto.accountId}`);
                 }
             } else {
                 const existingPortalAccount = await entityManager.getCustomRepository(PortalAccountRepository).findOneItem({
@@ -92,7 +92,7 @@ export class AuthenticationService {
             }
 
             if (!portalAccount) {
-                throw new NotFoundException(`Portal account with id ${userDto.portalAccountName} cannot be found`);
+                throw new NotFoundException(`Portal account with id ${userDto.accountId} cannot be found`);
             }
             const portalUser = new PortalUser();
             portalUser.firstName = userDto.firstName;

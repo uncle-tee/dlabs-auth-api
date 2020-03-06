@@ -1,8 +1,8 @@
 /* Oluwatobi Adenekan,mailtobi@dlabs.cloud 15/02/2020 */
-import {ModelFactory} from './contracts/ModelFactory';
 import {EntityManager} from 'typeorm';
 import FakerStatic = Faker.FakerStatic;
-import {ModelFactoryImpl} from './ModelFactoryImpl';
+import {ModelFactory} from '../../../test-starter/orm-faker/contracts/ModelFactory';
+import {ModelFactoryImpl} from '../../../test-starter/orm-faker/ModelFactoryImpl';
 
 export class ModelFactoryConfig {
     private static instance: ModelFactory = null;

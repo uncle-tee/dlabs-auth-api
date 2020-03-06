@@ -1,6 +1,5 @@
 import {INestApplication} from '@nestjs/common';
 import {Connection} from 'typeorm/connection/Connection';
-import {TestUtils} from '../../test-starter/config/TestUtils';
 import {App} from '../../domain/entity/App';
 import {Test, TestingModule} from '@nestjs/testing';
 import {AppModule} from '../../app.module';
@@ -11,15 +10,14 @@ import * as faker from 'faker';
 import {PortalUserDto} from '../../dto/portalUser/PortalUserDto';
 import {ServiceModule} from '../../service/service.module';
 import {AuthenticationService} from '../../service/AuthenticationService';
-import {AuthenticationInterceptor} from '../../conf/security/interceptors/AuthenticationInterceptor.service';
-import {MockAuthenticationInterceptor} from '../../test-starter/mocks/MockAuthenticationInterceptor';
 import {GenericStatusConstant} from '../../domain/enums/GenericStatusConstant';
+import {TestUtils} from './utils/TestUtils';
 
-describe('AppController', () => {
+describe('AuthController', () => {
     let applicationContext: INestApplication;
     let connection: Connection;
     let testUtils: TestUtils;
-    let appHeader: App;
+    let authApp: App;
     let signedUpUser: PortalUserDto;
     let authenticationService: AuthenticationService;
 
@@ -33,9 +31,9 @@ describe('AppController', () => {
         connection = getConnection();
         authenticationService = applicationContext.select(ServiceModule).get(AuthenticationService, {strict: true});
         await applicationContext.init();
-        testUtils = new TestUtils(connection);
-        appHeader = await testUtils.getAuthorisedApp();
-        signedUpUser = await testUtils.mockSignUpUser(authenticationService, appHeader);
+        testUtils = TestUtils.getInstance(connection);
+        authApp = await testUtils.getAuthorisedApp();
+        signedUpUser = await testUtils.mockSignUpUser(authenticationService, authApp);
 
     });
 
@@ -43,9 +41,9 @@ describe('AppController', () => {
         await request(applicationContext.getHttpServer())
             .post('/login')
             .set({
-                'X-APP-CODE': appHeader.code,
-                'X-APP-TOKEN': appHeader.token,
-                'Authorisation': appHeader.token
+                'X-APP-CODE': authApp.code,
+                'X-APP-TOKEN': authApp.token,
+                'Authorisation': authApp.token
             })
             .send(
                 {
@@ -60,9 +58,9 @@ describe('AppController', () => {
         await request(applicationContext.getHttpServer())
             .post('/login')
             .set({
-                'X-APP-CODE': appHeader.code,
-                'X-APP-TOKEN': appHeader.token,
-                'Authorisation': appHeader.token
+                'X-APP-CODE': authApp.code,
+                'X-APP-TOKEN': authApp.token,
+                'Authorisation': authApp.token
             })
             .send(
                 {
@@ -77,29 +75,26 @@ describe('AppController', () => {
         return request(applicationContext.getHttpServer())
             .post('/login')
             .set({
-                'X-APP-CODE': appHeader.code,
-                'X-APP-TOKEN': appHeader.token,
-                'Authorisation': appHeader.token
+                'X-APP-CODE': authApp.code,
+                'X-APP-TOKEN': authApp.token
             }).send({
                 username: signedUpUser.email,
                 password: signedUpUser.password,
-            }).expect(200);
+            }).expect(201);
     });
 
     it('Test that a logged in user can get is full information', async () => {
+        const authToken = await TestUtils.getInstance(connection).mockLoginUser(authenticationService, authApp);
         const response = await request(applicationContext.getHttpServer())
-            .post('/me').set({
-                'X-APP-CODE': appHeader.code,
-                'X-APP-TOKEN': appHeader.token,
-                'Authorisation': appHeader.token
-            }).send({
-                username: signedUpUser.username,
-                password: signedUpUser.password,
+            .get('/me').set({
+                'X-APP-CODE': authApp.code,
+                'X-APP-TOKEN': authApp.token,
+                'Authorization': `Bearer ${authToken}`
             });
         expect(response.body.portalUser.firstName).toEqual(signedUpUser.firstName);
         expect(response.body.portalUser.lastName).toEqual(signedUpUser.lastName);
-        expect(response.body.portalUser.gender).toEqual(signedUpUser.gender);
-        expect(response.body.portalUser.username).toEqual(signedUpUser.username);
+        expect(response.body.portalUser.gender).toEqual(signedUpUser.gender.toString());
+        expect(response.body.portalUser.username).toEqual(signedUpUser.username.toLowerCase());
         expect(response.body.portalUser.email).toEqual(signedUpUser.email);
         expect(response.body.portalUser.phoneNumber).toEqual(signedUpUser.phoneNumber);
         expect(response.body.portalUser.status).toEqual(GenericStatusConstant.ACTIVE);
@@ -108,12 +103,9 @@ describe('AppController', () => {
     it('Test That when a deactivated user is called from /me returns 404', () => {
         return request(applicationContext.getHttpServer())
             .post('/me').set({
-                'X-APP-CODE': appHeader.code,
-                'X-APP-TOKEN': appHeader.token,
-                'Authorisation': appHeader.token
-            }).send({
-                username: signedUpUser.username,
-                password: signedUpUser.password,
+                'X-APP-CODE': authApp.code,
+                'X-APP-TOKEN': authApp.token,
+                'Authorisation': authApp.token
             }).expect(404);
     });
 

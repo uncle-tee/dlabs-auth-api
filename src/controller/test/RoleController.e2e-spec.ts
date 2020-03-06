@@ -8,14 +8,19 @@ import {AppModule} from '../../app.module';
 import {ServiceModule} from '../../service/service.module';
 import {getConnection} from 'typeorm';
 import * as request from 'supertest';
+import {Permission} from '../../domain/entity/Permission';
+import {PermissionModelFactory} from '../../test-starter/factory/PermissionModelFactory';
+import * as faker from 'faker';
+import {asap} from 'rxjs/internal/scheduler/asap';
 
 describe('RoleController', () => {
     let applicationContext: INestApplication;
     let connection: Connection;
     let testUtils: TestUtils;
     let authenticationService: AuthenticationService;
-    let appHeader: App;
+    let authorisedApp: App;
     let loginToken: string;
+    let permissions: Permission[];
 
     beforeAll(async () => {
         const moduleRef: TestingModule = await Test.createTestingModule({
@@ -26,22 +31,48 @@ describe('RoleController', () => {
         authenticationService = applicationContext.select(ServiceModule).get(AuthenticationService, {strict: true});
         connection = getConnection();
         await applicationContext.init();
-        testUtils = new TestUtils(connection);
-        appHeader = await testUtils.getAuthorisedApp();
-        loginToken = await testUtils.mockLoginUser(authenticationService, appHeader);
+        testUtils = TestUtils.getInstance(connection);
+        authorisedApp = await testUtils.getAuthorisedApp();
+        loginToken = await testUtils.mockLoginUser(authenticationService, authorisedApp);
+        permissions = await testUtils.initModelFactory()
+            .upset<Permission>(PermissionModelFactory.TAG)
+            .use((it) => {
+                it.app = authorisedApp;
+                return it;
+            }).createMany(5);
 
     });
-    it('Test if role is corrected', async () => {
+    it('Test that permission code are from the same app', async () => {
+        const permissionCodes = (await testUtils
+            .initModelFactory()
+            .createMany<Permission>(5, PermissionModelFactory.TAG))
+            .map(permission => permission.code);
         await request(applicationContext.getHttpServer())
-            .post('/role')
+            .post('/role-management/roles')
             .set({
-                'X-APP-CODE': appHeader.code,
-                'X-APP-TOKEN': appHeader.token,
-                'Authorisation': loginToken
+                'X-APP-CODE': authorisedApp.code,
+                'X-APP-TOKEN': authorisedApp.token,
+                'Authorization': `Bearer ${loginToken}`
+            }).send({
+                name: faker.random.word(),
+                permissionCodes,
+                description: faker.random.words(40)
+            }).expect(400);
+    });
+
+    it('Test if role is created', async () => {
+        await request(applicationContext.getHttpServer())
+            .post('/role-management/roles')
+            .set({
+                'X-APP-CODE': authorisedApp.code,
+                'X-APP-TOKEN': authorisedApp.token,
+                'Authorization': `Bearer ${loginToken}`
             })
             .send(
                 {
-                    permissionName: 'newPermission'
+                    name: 'newPermission',
+                    permissionCodes: permissions.map(val => val.code),
+                    description: faker.random.words(40)
 
                 }
             ).expect(201);

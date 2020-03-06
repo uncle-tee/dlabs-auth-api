@@ -13,14 +13,18 @@ import {AppRepository} from '../../dao/AppRepository';
 import {TestUtils} from './utils/TestUtils';
 import {testForBuffer} from 'class-transformer/TransformOperationExecutor';
 import {ModelFactory} from '../../test-starter/orm-faker/contracts/ModelFactory';
-import {AppFactory} from './factory/AppFactory';
 import {PortalUser} from '../../domain/entity/PortalUser';
+import {AppFactory} from '../../test-starter/factory/AppFactory';
+import {PortalUserModelFactory} from '../../test-starter/factory/PortalUserModelFactory';
+import {PortalUserAccount} from '../../domain/entity/PortalUserAccount';
+import {PortalAccount} from '../../domain/entity/PortalAccount';
+import {PortalAccountModelFactory} from '../../test-starter/factory/PortalAccountModelFactory';
 
-describe('AppController', () => {
+describe('AuthController', () => {
     let applicationContext: INestApplication;
     let connection: Connection;
     let testUtils: TestUtils;
-    let appHeader: App;
+    let authorisedApp: App;
     let modelFactory: ModelFactory;
 
     beforeAll(async () => {
@@ -32,9 +36,9 @@ describe('AppController', () => {
         applicationContext = moduleRef.createNestApplication();
         await applicationContext.init();
         connection = getConnection();
-        testUtils = new TestUtils(connection);
+        testUtils = TestUtils.getInstance(connection);
         modelFactory = testUtils.initModelFactory();
-        appHeader = await testUtils.getAuthorisedApp();
+        authorisedApp = await testUtils.getAuthorisedApp();
 
     });
 
@@ -42,9 +46,9 @@ describe('AppController', () => {
         await request(applicationContext.getHttpServer())
             .post('/signUp')
             .set({
-                'X-APP-CODE': appHeader.code,
-                'X-APP-TOKEN': appHeader.token,
-                'Authorisation': appHeader.token
+                'X-APP-CODE': authorisedApp.code,
+                'X-APP-TOKEN': authorisedApp.token,
+                'Authorisation': authorisedApp.token
             })
             .send(
                 {
@@ -64,9 +68,9 @@ describe('AppController', () => {
         await request(applicationContext.getHttpServer())
             .post('/signUp')
             .set({
-                'X-APP-CODE': appHeader.code,
-                'X-APP-TOKEN': appHeader.token,
-                'Authorisation': appHeader.token
+                'X-APP-CODE': authorisedApp.code,
+                'X-APP-TOKEN': authorisedApp.token,
+                'Authorisation': authorisedApp.token
             })
             .send({
                 firstName: 'Olueatobi',
@@ -87,9 +91,9 @@ describe('AppController', () => {
         const response = await request(applicationContext.getHttpServer())
             .post('/signUp')
             .set({
-                'X-APP-CODE': appHeader.code,
-                'X-APP-TOKEN': appHeader.token,
-                'Authorisation': appHeader.token
+                'X-APP-CODE': authorisedApp.code,
+                'X-APP-TOKEN': authorisedApp.token,
+                'Authorisation': authorisedApp.token
             }).send({
                 firstName,
                 lastName,
@@ -108,22 +112,67 @@ describe('AppController', () => {
         expect(response.body.firstName).toBe(firstName);
     });
 
-    it('It test that only one unique username or password can exist on an app', () => {
-        return request(applicationContext.getHttpServer())
-            .post('/signup')
-            .set({
-                'X-APP-CODE': appHeader.code,
-                'X-APP-TOKEN': appHeader.token,
-                'Authorisation': appHeader.token
-            }).expect(409);
+    it('Test that only one unique username or password can exist on an app', async () => {
+
+        const users: PortalUser[] = [];
+        const portalAccounts = await modelFactory
+            .upset<PortalAccount>(PortalAccountModelFactory.TAG)
+            .use(pAccount => {
+                pAccount.app = authorisedApp;
+                return pAccount;
+            })
+            .createMany(3);
+
+        for (const portalAccount of portalAccounts) {
+            const user = await modelFactory
+                .upset<PortalUser>(PortalUserModelFactory.TAG)
+                .use(pUser => {
+                    pUser.username = portalAccount.name;
+                    return pUser;
+                }).create();
+            await modelFactory
+                .upset<PortalUserAccount>(PortalUserModelFactory.TAG)
+                .use((pUserAccount) => {
+                    pUserAccount.portalUser = user;
+                    pUserAccount.portalAccount = portalAccount;
+                    return pUserAccount;
+                })
+                .create();
+            users.push(user);
+        }
+
+        for (const pUser of users) {
+            await request(applicationContext.getHttpServer())
+                .post('/signup')
+                .set({
+                    'X-APP-CODE': authorisedApp.code,
+                    'X-APP-TOKEN': authorisedApp.token,
+                })
+                .send(
+                    {
+                        firstName: pUser.firstName,
+                        lastName: pUser.lastName,
+                        username: pUser.username,
+                        gender: pUser.gender,
+                        password: faker.random.alphaNumeric(10),
+                        phoneNumber: faker.phone.phoneNumber(),
+                        email: pUser.email
+                    }
+                )
+                .expect(409);
+        }
+
     });
 
     it('Test that a portal user cannot login with the another app credentials', async () => {
         const app = await modelFactory.create<App>(AppFactory.TAG);
-        modelFactory.create<PortalUser>()
         return request(applicationContext.getHttpServer())
-            .post('signup')
-            .set({});
+            .post('/signup')
+            .set({}).expect(401);
+    });
+
+    it('Test that are user can login in with user email or with username', () => {
+        return request(applicationContext.getHttpServer()).post('/signup').set({}).expect(401);
     });
 
     afterAll(async () => {

@@ -10,8 +10,6 @@ export class LoggerInterceptor implements NestInterceptor {
     }
 
     intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-        // tslint:disable-next-line:no-console
-        console.log(context.switchToHttp().getRequest().body);
         return next.handle();
     }
 }

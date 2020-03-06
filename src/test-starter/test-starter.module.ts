@@ -2,18 +2,14 @@
 
 import {Module} from '@nestjs/common';
 import {ServiceModule} from '../service/service.module';
-
-import {TestUtils} from './config/TestUtils';
+import {TestUtils} from '../controller/test/utils/TestUtils';
 
 @Module({
     imports: [
         ServiceModule,
     ],
-    providers: [
-        TestUtils,
-    ]
+    providers: []
 })
 export class TestStarterModule {
-
 }
 

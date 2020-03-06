@@ -9,9 +9,9 @@ import {Logger} from 'winston';
 import {Observable} from 'rxjs';
 import {AppRepository} from '../../../dao/AppRepository';
 import {ModelFactoryImpl} from '../../../test-starter/orm-faker/ModelFactoryImpl';
-import {ModelFactory} from '../../../test-starter/orm-faker/contracts/ModelFactory';
-import {AppFactory} from '../factory/AppFactory';
 import {Console} from 'inspector';
+import {ModelFactory} from '../../../test-starter/orm-faker/contracts/ModelFactory';
+import {AppFactory} from '../../../test-starter/factory/AppFactory';
 
 // @ts-ignore
 export class MockAppInterceptor extends AppInterceptor {
@@ -23,7 +23,6 @@ export class MockAppInterceptor extends AppInterceptor {
                        @Inject('winston') private readonly logger: Logger) {
         super(authenticationService, reflector, connection, logger);
 
-        console.log('tHIS IS THE MOCKER');
     }
 
     // @ts-ignore
@@ -36,10 +35,6 @@ export class MockAppInterceptor extends AppInterceptor {
             throw new UnauthorizedException('Token and code must be provided');
         }
         const app = this.modelFactory.create(AppFactory.TAG);
-        // tslint:disable-next-line:no-console
-        console.log(app);
-
-        // tslint:disable-next-line:no-console
 
         request.app = app;
         return next.handle();

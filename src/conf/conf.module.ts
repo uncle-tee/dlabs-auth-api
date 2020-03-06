@@ -2,7 +2,7 @@ import {Module} from '@nestjs/common';
 import {CoreModule} from '../core/core.module';
 import {ServiceModule} from '../service/service.module';
 import {WinstonModule} from 'nest-winston';
-import {APP_GUARD, APP_INTERCEPTOR} from '@nestjs/core';
+import {APP_GUARD, APP_INTERCEPTOR, APP_PIPE} from '@nestjs/core';
 import {AppInterceptor} from './security/interceptors/AppInterceptor';
 import * as winston from 'winston';
 import {LoggerInterceptor} from './security/interceptors/LoggerInterceptor';
@@ -40,7 +40,7 @@ import {ValidatorInterceptor} from './security/interceptors/ValidatorInterceptor
         },
         AuthenticationInterceptor,
         {
-            provide: APP_INTERCEPTOR,
+            provide: APP_PIPE,
             useClass: ValidatorInterceptor
         }]
 })

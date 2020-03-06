@@ -2,58 +2,41 @@ import {INestApplication} from '@nestjs/common';
 import {Connection} from 'typeorm/connection/Connection';
 import {TestUtils} from './utils/TestUtils';
 import {App} from '../../domain/entity/App';
-import {PortalUserDto} from '../../dto/portalUser/PortalUserDto';
-import {AuthenticationService} from '../../service/AuthenticationService';
 import {Test, TestingModule} from '@nestjs/testing';
 import {AppModule} from '../../app.module';
-import {AppService} from '../../app.service';
-import {ServiceModule} from '../../service/service.module';
 import {getConnection} from 'typeorm';
 import * as request from 'supertest';
-import {AuthenticationInterceptor} from '../../conf/security/interceptors/AuthenticationInterceptor.service';
-import {MockAuthenticationInterceptor} from './utils/MockAuthenticationInterceptor';
+import {ModelFactory} from '../../test-starter/orm-faker/contracts/ModelFactory';
 import {Permission} from '../../domain/entity/Permission';
-import {ModelFactory} from './typeOrmFaker/contracts/ModelFactory';
-import {PermissionModelFactory} from './utils/factory/PermissionModelFactory';
-import {AppFactory} from './utils/factory/AppFactory';
+import {PermissionModelFactory} from '../../test-starter/factory/PermissionModelFactory';
 
 describe('PermissionController', () => {
     let applicationContext: INestApplication;
     let connection: Connection;
     let testUtils: TestUtils;
-    let appHeader: App;
+    let authApp: App;
     let modelFactory: ModelFactory;
 
     beforeAll(async () => {
         const moduleRef: TestingModule = await Test.createTestingModule({
             imports: [AppModule]
-        })
-            .overrideProvider(AuthenticationInterceptor)
-            .useClass(MockAuthenticationInterceptor)
-            .compile();
+        }).compile();
 
         applicationContext = moduleRef.createNestApplication();
         connection = getConnection();
         await applicationContext.init();
-        testUtils = new TestUtils(connection);
+        testUtils = TestUtils.getInstance(connection);
         modelFactory = testUtils.initModelFactory();
-        // tslint:disable-next-line:no-console
-        const permissionPromise = modelFactory
-            .upset<Permission>(PermissionModelFactory.TAG).use(val => {
-                val.name = 'Raymond';
-                return val;
-            }).makeMany(50);
-        // tslint:disable-next-line:no-console
-        console.log(await permissionPromise);
+        authApp = await testUtils.getAuthorisedApp();
 
     });
 
-    it('Test of permission can be created', async () => {
-        request(applicationContext.getHttpServer())
+    it('Test of permission can be created', () => {
+        return request(applicationContext.getHttpServer())
             .post('/permissions')
             .set({
-                // 'X-APP-CODE': appHeader.code,
-                // 'X-APP-TOKEN': appHeader.token
+                'X-APP-CODE': authApp.code,
+                'X-APP-TOKEN': authApp.token
             })
             .send(
                 {

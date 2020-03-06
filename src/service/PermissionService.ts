@@ -14,13 +14,13 @@ export class PermissionService {
     }
 
     async createPermission(permission: PermissionDto, app: App) {
-        const newPermission = new Permission();
-        newPermission.name = permission.permissionName;
-        newPermission.code = await this.permissionSequenceGenerator.next();
-        newPermission.app = app;
 
         return this.connection.transaction(async (entityManager) => {
-            return  entityManager.getCustomRepository(PermissionRepository).save(newPermission);
+            const newPermission = new Permission();
+            newPermission.name = permission.permissionName;
+            newPermission.code = await this.permissionSequenceGenerator.next();
+            newPermission.app = app;
+            return entityManager.save(newPermission);
         });
     }
 
