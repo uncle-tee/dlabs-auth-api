@@ -15,4 +15,6 @@ export class RolePermission extends BaseEntity {
         nullable: false
     })
     permission: Permission;
+
+
 }

@@ -14,6 +14,7 @@ import {PortalAccountRepository} from '../dao/PortalAccountRepository';
 import {PortalAccount} from '../domain/entity/PortalAccount';
 import {Logger} from 'winston';
 import {PortalAccountSequenceGenerator} from '../core/sequenceGenerators/PortalAccountSequenceGenerator';
+import {isEmail} from '../d-labs-common/UsefulUtils';
 
 export class AuthenticationService {
 
@@ -98,9 +99,9 @@ export class AuthenticationService {
             portalUser.firstName = userDto.firstName;
             portalUser.lastName = userDto.lastName;
             portalUser.username = userDto.username.toLowerCase();
-            portalUser.password = await this.authenticationUtils.hashPassword(userDto.password.toLowerCase());
+            portalUser.password = await this.authenticationUtils.hashPassword(userDto.password);
             portalUser.gender = userDto.gender;
-            portalUser.email = userDto.email;
+            portalUser.email = userDto.email.toLowerCase();
             portalUser.phoneNumber = userDto.phoneNumber;
             portalUser.status = GenericStatusConstant.ACTIVE;
             await entityManager.save(portalUser);
@@ -115,15 +116,21 @@ export class AuthenticationService {
 
     public loginUser(loginDto: LoginDto, app: App): Promise<string> {
 
-        return this.connection.getCustomRepository(PortalUserRepository).createQueryBuilder('portalUser')
+        const queryBuilder = this.connection.getCustomRepository(PortalUserRepository).createQueryBuilder('portalUser')
             .select()
-            .where('portalUser.username = :username')
-            .setParameter('username', loginDto.username.toLowerCase())
             .innerJoin(PortalUserAccount, 'portalUserAccount', 'portalUserAccount.portalUser =  portalUser.id')
             .innerJoin(PortalAccount, 'portalAccount', 'portalUserAccount.portalAccount = portalAccount.id')
             .where('portalAccount.app = :app')
-            .setParameter('app', app.id)
-            .distinct().getOne()
+            .setParameter('app', app.id);
+        if (isEmail(loginDto.username)) {
+            queryBuilder.andWhere('portalUser.email = :username');
+        } else {
+            queryBuilder.andWhere('portalUser.username = :username');
+        }
+        return queryBuilder
+            .setParameter('username', loginDto.username.toLowerCase())
+            .distinct()
+            .getOne()
             .then(async portalUserValue => {
                 if (portalUserValue) {
                     const isTrue = await this.authenticationUtils

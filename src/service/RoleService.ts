@@ -27,6 +27,7 @@ export class RoleService {
             role.name = roleDto.name;
             role.code = await this.roleCodeSequenceGenerator.next();
             role.description = roleDto.description;
+            role.app = app;
             role.createdBy = requestPrincipal.portalUser;
             const newRole = await entityManager.save(role);
             return permissions.map(permission => {

@@ -64,7 +64,7 @@ describe('AuthController', () => {
             ).expect(201);
     });
 
-    it('Test if same user with same user name can exit', async () => {
+    it('Test that a username with same emaail or user name cannot exist on the same app', async () => {
         await request(applicationContext.getHttpServer())
             .post('/signUp')
             .set({
@@ -107,7 +107,7 @@ describe('AuthController', () => {
         expect(response.body.lastName).toBe(lastName);
         expect(response.body.password).toBeNull();
         expect(response.body.gender).toBe('MALE');
-        expect(response.body.email).toBe(email);
+        expect(response.body.email).toBe(email.toLowerCase());
         expect(response.body.phoneNumber).toBe(phoneNumber);
         expect(response.body.firstName).toBe(firstName);
     });
@@ -164,16 +164,9 @@ describe('AuthController', () => {
 
     });
 
-    it('Test that a portal user cannot login with the another app credentials', async () => {
-        const app = await modelFactory.create<App>(AppFactory.TAG);
-        return request(applicationContext.getHttpServer())
-            .post('/signup')
-            .set({}).expect(401);
-    });
 
-    it('Test that are user can login in with user email or with username', () => {
-        return request(applicationContext.getHttpServer()).post('/signup').set({}).expect(401);
-    });
+
+
 
     afterAll(async () => {
         await connection.close();

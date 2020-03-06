@@ -8,3 +8,8 @@ export function zeroFills(numberVal, width) {
     return numberVal + '';
 }
 
+export function isEmail(email): boolean {
+    const re = /\S+@\S+\.\S+/;
+    return re.test(email);
+}
+
