@@ -1,3 +1,3 @@
 export enum GenericStatusConstant {
-    ACTIVE, IN_ACTIVE
+    ACTIVE, IN_ACTIVE, DELETED
 }
