@@ -61,6 +61,7 @@ describe('RoleController', () => {
     });
 
     it('Test that a role can be found by code', async () => {
+        await modelFactory.createMany<Permission>(3, PermissionModelFactory.TAG);
         for (let i = 0; i <= 3; i++) {
 
             const role = await modelFactory.upset<Role>(RoleModelFactory.TAG)
