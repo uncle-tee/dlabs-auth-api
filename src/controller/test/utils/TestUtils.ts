@@ -9,6 +9,8 @@ import {ModelFactory} from '../../../test-starter/orm-faker/contracts/ModelFacto
 import {ModelFactoryRoster} from '../../../test-starter/factory/ModelFactoryRoster';
 import {GenderConstant} from '../../../domain/enums/GenderConstant';
 import {LoginDto} from '../../../dto/auth/LoginDto';
+import {PortalUserRepository} from '../../../dao/PortalUserRepository';
+import {GenericStatusConstant} from '../../../domain/enums/GenericStatusConstant';
 
 export class TestUtils {
 
@@ -50,12 +52,33 @@ export class TestUtils {
 
     }
 
+    /**
+     * Mock a new user login noting that a new user will be inactive when created not until the user is active;
+     * @param authenticationService
+     * @param app
+     */
     async mockNewSignUpUser(authenticationService: AuthenticationService, app: App): Promise<PortalUserDto> {
-        this.portalUserDto = null;
-        return this.mockSignUpUser(authenticationService, app);
+        const newUser = new PortalUserDto();
+        newUser.username = faker.name.firstName();
+        newUser.phoneNumber = faker.phone.phoneNumber();
+        newUser.email = faker.internet.email();
+        newUser.gender = GenderConstant.MALE;
+        newUser.lastName = faker.name.lastName();
+        newUser.firstName = faker.name.firstName();
+        newUser.password = faker.random.uuid();
+        await authenticationService.signUpUser(newUser, app);
+        return newUser;
     }
 
-    async mockSignUpUser(authenticationService: AuthenticationService, app: App): Promise<PortalUserDto> {
+    async mockNewUserLogin(authenticationService: AuthenticationService, app: App) {
+        const portalUserDto = await this.mockNewSignUpUser(authenticationService, app);
+        const loginDto = new LoginDto();
+        loginDto.username = portalUserDto.username;
+        loginDto.password = portalUserDto.password;
+        return await authenticationService.loginUser(loginDto, app);
+    }
+
+    async mockActiveSignUpUser(authenticationService: AuthenticationService, app: App): Promise<PortalUserDto> {
 
         if (!this.portalUserDto) {
             this.portalUserDto = new PortalUserDto();
@@ -66,18 +89,21 @@ export class TestUtils {
             this.portalUserDto.lastName = faker.name.lastName();
             this.portalUserDto.firstName = faker.name.firstName();
             this.portalUserDto.password = faker.random.uuid();
-            await authenticationService.signUpUser(this.portalUserDto, app);
+            const portalUser = await authenticationService.signUpUser(this.portalUserDto, app);
+            portalUser.status = GenericStatusConstant.ACTIVE;
+            this.connection.getCustomRepository(PortalUserRepository).save(portalUser);
+
         }
         return this.portalUserDto;
 
     }
 
     async mockLoginUser(authenticationService: AuthenticationService, app: App) {
-        const signUpUser = await this.mockSignUpUser(authenticationService, app);
+        const signUpUser = await this.mockActiveSignUpUser(authenticationService, app);
         const loginDto = new LoginDto();
         loginDto.username = signUpUser.username;
         loginDto.password = signUpUser.password;
         return await authenticationService.loginUser(loginDto, app);
-
     }
+
 }

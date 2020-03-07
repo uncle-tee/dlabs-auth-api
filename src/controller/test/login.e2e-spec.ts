@@ -37,7 +37,7 @@ describe('AuthController(Login)', () => {
         testUtils = TestUtils.getInstance(connection);
         authApp = await testUtils.getAuthorisedApp();
         modelFactory = testUtils.initModelFactory();
-        signedUpUser = await testUtils.mockSignUpUser(authenticationService, authApp);
+        signedUpUser = await testUtils.mockActiveSignUpUser(authenticationService, authApp);
 
     });
 
@@ -125,6 +125,19 @@ describe('AuthController(Login)', () => {
             }).expect(404);
     });
 
+    it('Test that an inactive user cannot login', async () => {
+        const app = await modelFactory.create<App>(AppFactory.TAG);
+        const newuser = await testUtils.mockNewSignUpUser(authenticationService, app);
+        await request(applicationContext.getHttpServer())
+            .post('/login')
+            .set({
+                'X-APP-CODE': app.code,
+                'X-APP-TOKEN': app.token,
+            }).send({
+                username: newuser.username,
+                password: newuser.password,
+            }).expect(401);
+    });
     it('Test that a portal user cannot login with the another app credentials', async () => {
 
         const app = await modelFactory.create<App>(AppFactory.TAG);
@@ -140,8 +153,6 @@ describe('AuthController(Login)', () => {
                 password: portalUser.password,
             }).expect(401);
     });
-
-
 
     afterAll(async () => {
         await connection.close();
