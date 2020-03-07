@@ -38,11 +38,7 @@ import {ValidatorInterceptor} from './security/interceptors/ValidatorInterceptor
             provide: APP_INTERCEPTOR,
             useExisting: AuthenticationInterceptor
         },
-        AuthenticationInterceptor,
-        {
-            provide: APP_PIPE,
-            useClass: ValidatorInterceptor
-        }]
+        AuthenticationInterceptor]
 })
 export class ConfModule {
 }

@@ -12,6 +12,11 @@ import {Permission} from '../../domain/entity/Permission';
 import {PermissionModelFactory} from '../../test-starter/factory/PermissionModelFactory';
 import * as faker from 'faker';
 import {asap} from 'rxjs/internal/scheduler/asap';
+import {ModelFactory} from '../../test-starter/orm-faker/contracts/ModelFactory';
+import {Role} from '../../domain/entity/Role';
+import {RolePermission} from '../../domain/entity/RolePermission';
+import {RolePermissionModelFactory} from '../../test-starter/factory/RolePermissionModelFactory';
+import {RoleModelFactory} from '../../test-starter/factory/RoleModelFactory';
 
 describe('RoleController', () => {
     let applicationContext: INestApplication;
@@ -20,7 +25,7 @@ describe('RoleController', () => {
     let authenticationService: AuthenticationService;
     let authorisedApp: App;
     let loginToken: string;
-    let permissions: Permission[];
+    let modelFactory: ModelFactory;
 
     beforeAll(async () => {
         const moduleRef: TestingModule = await Test.createTestingModule({
@@ -34,12 +39,7 @@ describe('RoleController', () => {
         testUtils = TestUtils.getInstance(connection);
         authorisedApp = await testUtils.getAuthorisedApp();
         loginToken = await testUtils.mockLoginUser(authenticationService, authorisedApp);
-        permissions = await testUtils.initModelFactory()
-            .upset<Permission>(PermissionModelFactory.TAG)
-            .use((it) => {
-                it.app = authorisedApp;
-                return it;
-            }).createMany(5);
+        modelFactory = testUtils.initModelFactory();
 
     });
     it('That that user cannot create role if the permissions codes are not on the app.', async () => {
@@ -60,7 +60,57 @@ describe('RoleController', () => {
             }).expect(400);
     });
 
+    it('Test that a role can be found by code', async () => {
+        for (let i = 0; i <= 3; i++) {
+
+            const role = await modelFactory.upset<Role>(RoleModelFactory.TAG)
+                .use(mockRole => {
+                    mockRole.app = authorisedApp;
+                    return mockRole;
+                }).create();
+
+            const permissions = await modelFactory.upset<Permission>(PermissionModelFactory.TAG).use(mockPermission => {
+                mockPermission.app = authorisedApp;
+                return mockPermission;
+            }).createMany(4);
+
+            for (const perm of permissions) {
+                await modelFactory.upset<RolePermission>(RolePermissionModelFactory.TAG)
+                    .use(rPermission => {
+                        rPermission.role = role;
+                        rPermission.permission = perm;
+                        return rPermission;
+                    }).create();
+            }
+
+            const response = await request(applicationContext.getHttpServer())
+                .get(`/role-management/roles/${role.code}`)
+                .set({
+                    'X-APP-CODE': authorisedApp.code,
+                    'X-APP-TOKEN': authorisedApp.token,
+                    'Authorization': `Bearer ${loginToken}`
+                }).expect(200);
+            expect(response.body.name).toEqual(role.name);
+            expect(response.body.description).toEqual(role.description);
+            expect(response.body.code).toEqual(role.code);
+            expect(response.body.permissions).toHaveLength(4);
+            expect(response.body.permissions).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({
+                        name: permissions[0].name,
+                        code: permissions[0].code
+                    }),
+                ])
+            );
+        }
+    });
+
     it('Test if role is created', async () => {
+        const permissions = await modelFactory.upset<Permission>(PermissionModelFactory.TAG)
+            .use((it) => {
+                it.app = authorisedApp;
+                return it;
+            }).createMany(5);
         await request(applicationContext.getHttpServer())
             .post('/role-management/roles')
             .set({
