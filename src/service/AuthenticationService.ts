@@ -103,7 +103,7 @@ export class AuthenticationService {
             portalUser.gender = userDto.gender;
             portalUser.email = userDto.email.toLowerCase();
             portalUser.phoneNumber = userDto.phoneNumber;
-            portalUser.status = GenericStatusConstant.ACTIVE;
+            portalUser.status = GenericStatusConstant.IN_ACTIVE;
             await entityManager.save(portalUser);
             const portalUserAccount = new PortalUserAccount();
             portalUserAccount.portalUser = portalUser;
@@ -122,7 +122,9 @@ export class AuthenticationService {
             .innerJoin(PortalUserAccount, 'portalUserAccount', 'portalUserAccount.portalUser =  portalUser.id')
             .innerJoin(PortalAccount, 'portalAccount', 'portalUserAccount.portalAccount = portalAccount.id')
             .where('portalAccount.app = :app')
-            .setParameter('app', app.id);
+            .andWhere('portalUser.status = :status')
+            .setParameter('app', app.id)
+            .setParameter('status', GenericStatusConstant.ACTIVE);
         if (isEmail(loginDto.username)) {
             queryBuilder.andWhere('portalUser.email = :username');
         } else {

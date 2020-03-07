@@ -8,6 +8,7 @@ import {PortalUserRepository} from '../../../dao/PortalUserRepository';
 import {PortalUser} from '../../../domain/entity/PortalUser';
 import {Principal} from '../requestPrincipal/Principal';
 import {TokenExpiredError} from 'jsonwebtoken';
+import {GenericStatusConstant} from '../../../domain/enums/GenericStatusConstant';
 
 @Injectable()
 export class AuthenticationInterceptor implements NestInterceptor {
@@ -36,9 +37,13 @@ export class AuthenticationInterceptor implements NestInterceptor {
             .verifyIncomingRequest(request)
             .then((decoded: { sub: string }) => {
                 return this.connection.getCustomRepository(PortalUserRepository).findOneItem({
-                    id: Number(decoded.sub)
+                    id: Number(decoded.sub),
+                    status: GenericStatusConstant.ACTIVE
                 });
             }).then((portalUser: PortalUser) => {
+                if (!portalUser) {
+                    throw new UnauthorizedException('User is not active');
+                }
                 delete portalUser.password;
                 request.requestPrincipal = new Principal(portalUser, ip);
             }).catch((error) => {
