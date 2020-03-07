@@ -133,6 +133,10 @@ describe('RoleController', () => {
     });
 
     it('Test to get all created roles', async () => {
+        const existingRoleCount = await connection.getCustomRepository(RoleRepository).count({
+            app: authorisedApp,
+            status: GenericStatusConstant.ACTIVE
+        });
         const roles = await modelFactory.upset<Role>(RoleModelFactory.TAG).use((it) => {
             it.app = authorisedApp;
             return it;
@@ -147,7 +151,7 @@ describe('RoleController', () => {
                 'Authorization': `Bearer ${loginToken}`
             })
             .expect(200);
-        expect(response.body).toHaveLength(5);
+        expect(response.body).toHaveLength(existingRoleCount + 5);
         expect(response.body).toEqual(
             expect.arrayContaining([
                 expect.objectContaining({
