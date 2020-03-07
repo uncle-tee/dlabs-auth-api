@@ -20,14 +20,11 @@ export class ValidatorInterceptor implements PipeTransform<any> {
     }
 
     private createValidationMessage(validationError: ValidationError) {
-        // tslint:disable-next-line:one-variable-per-declaration
         const property = validationError.property, constraints: { [p: string]: string } = validationError.constraints;
         return {
             'property-name': property,
             'errors': Object.values(constraints)
         };
-        // tslint:disable-next-line:no-console
-
     }
 }
 

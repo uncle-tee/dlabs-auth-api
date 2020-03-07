@@ -15,7 +15,7 @@ export class PermissionService {
 
     async createPermission(permission: PermissionDto, app: App) {
 
-        return this.connection.transaction(async (entityManager) => {
+        return await this.connection.transaction(async (entityManager) => {
             const newPermission = new Permission();
             newPermission.name = permission.permissionName;
             newPermission.code = await this.permissionSequenceGenerator.next();

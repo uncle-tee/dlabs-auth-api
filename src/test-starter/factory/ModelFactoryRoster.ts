@@ -12,6 +12,10 @@ import {PortalAccount} from '../../domain/entity/PortalAccount';
 import {PortalAccountModelFactory} from './PortalAccountModelFactory';
 import {PortalUserAccount} from '../../domain/entity/PortalUserAccount';
 import {PortalUserAccountFactory} from './PortalUserAccountFactory';
+import {Role} from '../../domain/entity/Role';
+import {RoleModelFactory} from './RoleModelFactory';
+import {RolePermission} from '../../domain/entity/RolePermission';
+import {RolePermissionModelFactory} from './RolePermissionModelFactory';
 
 export class ModelFactoryRoster {
     static register(modelFactory: ModelFactory) {
@@ -20,5 +24,7 @@ export class ModelFactoryRoster {
         modelFactory.register<PortalUser, PortalUserModelFactory>(PortalUserModelFactory);
         modelFactory.register<PortalAccount, PortalAccountModelFactory>(PortalAccountModelFactory);
         modelFactory.register<PortalUserAccount, PortalUserAccountFactory>(PortalUserAccountFactory);
+        modelFactory.register<Role, RoleModelFactory>(RoleModelFactory);
+        modelFactory.register<RolePermission, RolePermissionModelFactory>(RolePermissionModelFactory);
     }
 }
