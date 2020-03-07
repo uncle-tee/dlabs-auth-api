@@ -114,9 +114,10 @@ export class AuthenticationService {
         });
     }
 
-    public loginUser(loginDto: LoginDto, app: App): Promise<string> {
+    public async loginUser(loginDto: LoginDto, app: App): Promise<string> {
 
-        const queryBuilder = this.connection.getCustomRepository(PortalUserRepository).createQueryBuilder('portalUser')
+        const queryBuilder = this.connection.getCustomRepository(PortalUserRepository)
+            .createQueryBuilder('portalUser')
             .select()
             .innerJoin(PortalUserAccount, 'portalUserAccount', 'portalUserAccount.portalUser =  portalUser.id')
             .innerJoin(PortalAccount, 'portalAccount', 'portalUserAccount.portalAccount = portalAccount.id')
@@ -127,7 +128,7 @@ export class AuthenticationService {
         } else {
             queryBuilder.andWhere('portalUser.username = :username');
         }
-        return queryBuilder
+        return await queryBuilder
             .setParameter('username', loginDto.username.toLowerCase())
             .distinct()
             .getOne()

@@ -1,4 +1,4 @@
-import {Body, Controller, Get, Param, Post} from '@nestjs/common';
+import {Body, Controller, Delete, Get, NotFoundException, Param, Post, Query} from '@nestjs/common';
 import {RoleDto} from '../../dto/rolesAndPermission/RoleDto';
 import {RequestPrincipal} from '../../conf/security/requestPrincipal/RequestPrincipal';
 import {Principal} from '../../conf/security/requestPrincipal/Principal';
@@ -23,8 +23,36 @@ export class RolesController {
         await this.roleService.createRole(role, requestPrincipal, app);
     }
 
+    @Get()
+    public async getRoles(@AppContext() app: App) {
+        const roles = await this.connection.getCustomRepository(RoleRepository).findItem({
+            app
+        });
+        return roles.map(role => {
+            const roleResponseDto = new RoleResponseDto();
+            roleResponseDto.description = role.description;
+            roleResponseDto.code = role.code;
+            roleResponseDto.name = role.name;
+            return roleResponseDto;
+        });
+    }
+
+    @Delete('/:code')
+    public async deleteRole(@Param('code') code: string, @AppContext() app: App) {
+        const roleRepository = this.connection.getCustomRepository(RoleRepository);
+        const role = await roleRepository.findOneItem({
+            code,
+            app
+        });
+        if (!role) {
+            throw new NotFoundException(`Role with code ${code} cannot be found`);
+        }
+        role.status = GenericStatusConstant.DELETED;
+        await roleRepository.save(role);
+    }
+
     @Get('/:code')
-    public async getRoles(@Param('code') code: string, @AppContext() app: App) {
+    public async getRole(@Param('code') code: string, @AppContext() app: App) {
         const role = await this.connection.getCustomRepository(RoleRepository).findOneItem({
             code,
             app

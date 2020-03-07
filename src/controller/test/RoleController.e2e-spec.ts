@@ -17,6 +17,9 @@ import {Role} from '../../domain/entity/Role';
 import {RolePermission} from '../../domain/entity/RolePermission';
 import {RolePermissionModelFactory} from '../../test-starter/factory/RolePermissionModelFactory';
 import {RoleModelFactory} from '../../test-starter/factory/RoleModelFactory';
+import {RoleRepository} from '../../dao/RoleRepository';
+import {GenericStatusConstant} from '../../domain/enums/GenericStatusConstant';
+import arrayContaining = jasmine.arrayContaining;
 
 describe('RoleController', () => {
     let applicationContext: INestApplication;
@@ -58,6 +61,29 @@ describe('RoleController', () => {
                 permissionCodes,
                 description: faker.random.words(40)
             }).expect(400);
+    });
+
+    it('Test that a role can be deleted by code', async () => {
+        const roles = await modelFactory.upset<Role>(RoleModelFactory.TAG).use((r) => {
+            r.app = authorisedApp;
+            return r;
+        }).createMany(4);
+        for (let i = 0; i <= 3; i++) {
+            await request(applicationContext.getHttpServer())
+                .delete(`/role-management/roles/${roles[i].code}`)
+                .set({
+                    'X-APP-CODE': authorisedApp.code,
+                    'X-APP-TOKEN': authorisedApp.token,
+                    'Authorization': `Bearer ${loginToken}`
+                }).expect(200);
+        }
+
+        const count = await connection.getCustomRepository(RoleRepository)
+            .count({
+                status: GenericStatusConstant.DELETED,
+                app: authorisedApp
+            });
+        expect(count).toEqual(4);
     });
 
     it('Test that a role can be found by code', async () => {
@@ -106,6 +132,33 @@ describe('RoleController', () => {
         }
     });
 
+    it('Test to get all created roles', async () => {
+        const roles = await modelFactory.upset<Role>(RoleModelFactory.TAG).use((it) => {
+            it.app = authorisedApp;
+            return it;
+        }).createMany(5);
+        await modelFactory.createMany<Role>(3, RoleModelFactory.TAG);
+        const response = await request(applicationContext
+            .getHttpServer())
+            .get('/role-management/roles')
+            .set({
+                'X-APP-CODE': authorisedApp.code,
+                'X-APP-TOKEN': authorisedApp.token,
+                'Authorization': `Bearer ${loginToken}`
+            })
+            .expect(200);
+        expect(response.body).toHaveLength(5);
+        expect(response.body).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    name: roles[0].name,
+                    code: roles[0].code,
+                    description: roles[0].description
+                })
+            ])
+        );
+
+    });
     it('Test if role is created', async () => {
         const permissions = await modelFactory.upset<Permission>(PermissionModelFactory.TAG)
             .use((it) => {
